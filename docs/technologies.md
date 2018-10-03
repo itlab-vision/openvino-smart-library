@@ -1,7 +1,7 @@
-# Используемые технологии
+# РСЃРїРѕР»СЊР·СѓРµРјС‹Рµ С‚РµС…РЅРѕР»РѕРіРёРё
 
-- Библиотека [OpenCV][opencv] в составе
-  [OpenVINO toolkit][openvino-toolkit].
+- Р‘РёР±Р»РёРѕС‚РµРєР° [OpenCV][opencv] РІ СЃРѕСЃС‚Р°РІРµ
+  [OpenVINO toolkit][openvino-toolkit]
 - 
 - 
 
