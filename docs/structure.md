@@ -23,8 +23,8 @@
 
 # Основные сценарии работы системы
 
-![Диаграмма прецедентов использования](../imgs/UseCase.emf)
+![](../imgs/UseCase.emf)
 
-![Диаграмма последовательности для Читателя](../imgs/ReaderRequests.emf)
+![](../imgs/ReaderRequests.emf)
 
-![Диаграмма последовательности для Администратора](../imgs/AdminRequests.emf)
+![](../imgs/AdminRequests.emf)
