@@ -23,8 +23,8 @@
 
 # Основные сценарии работы системы
 
-![](../imgs/UseCase.emf)
+![](../imgs/UseCase.png)
 
-![](../imgs/ReaderRequests.emf)
+![](../imgs/ReaderRequests.png)
 
-![](../imgs/AdminRequests.emf)
+![](../imgs/AdminRequests.png)
