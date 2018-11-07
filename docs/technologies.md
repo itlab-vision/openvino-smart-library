@@ -6,7 +6,7 @@
 - [PostgreSQL][postgresql] для хранения данных.
   Адаптер для Python - [PyGreSQL][pygresql].
   Примечание: в первом варианте имеет смысл работать
-  с обычными файлами вместо БД.
+  с обычными файлами вместо БД.	
 
 <!-- LINKS -->
 [openvino-toolkit]: https://software.intel.com/en-us/openvino-toolkit
