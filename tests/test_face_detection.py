@@ -8,7 +8,7 @@ import face_detection
 class CommonTestCase(unittest.TestCase):
     
     def test(self):
-        img = cv2.imread("lena.png")
+        img = cv2.imread("..\samples\lena.png")
         face_cascade = face_detection.FaceDetector.CreateDetector('cascade')
         face_cascade.Init("C:\Intel\computer_vision_sdk_2018.3.343\opencv\etc\haarcascades\haarcascade_frontalface_alt.xml")
         rects = face_cascade.Detect(img)
