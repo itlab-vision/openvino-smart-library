@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-def Nice(frame, tpls, coeff, min_count, det_name):
+def Recognize(frame, tpls, coeff, min_count, det_name):
     max_num_kp = 0
     for t in tpls:
         tpl = cv2.imread(t)
