@@ -1,0 +1,5 @@
+LIBRARY "pvl_wrapper"
+EXPORTS
+Recognize
+Register
+UnknownID
