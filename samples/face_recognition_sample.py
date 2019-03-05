@@ -1,13 +1,14 @@
 import sys, os
 import argparse 
-import numpy as np
+#import numpy as np
 import cv2
-sys.path.append("..\src\modules")
+sys.path.append("..\\src\\modules")
 import face_recognizer
 
 
 rec = face_recognizer.PVLRecognizer()
-rec.Create("..\\src\\modules\\pvl\\build\\PVL_wrapper.dll")
+rec.Create("..\\src\\modules\\pvl\\build\\Release\\PVL_wrapper.dll")
+#rec.Create("C:\\Users\\Yuki\\source\\repos\\openvino-smart-library\\src\\modules\\pvl\\build\\Debug\\PVL_wrapper.dll")
 cap = cv2.VideoCapture(0)
 UID = -10000
 name = "UNKNOWN"
