@@ -2,8 +2,10 @@ import sys, os
 import cv2
 from PyQt5 import QtWidgets, QtCore, QtGui
 import LoginWin  #design
-import SignupWin
+import SignupWin #design
 import AdminWin  #design
+import AdminWin  #design
+import ReaderWin
 sys.path.insert(0, '../modules')
 import face_recognizer
 import book_recognizer
@@ -19,7 +21,7 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         self.pushButton.clicked.connect(self.SignUp)
         self.pushButton_2.clicked.connect(self.SignIn)  # execute func on button click
         self.admWin = AdminWindow()
-#        self.readerwin = ReaderWindow()
+        self.readerWin = ReaderWindow()
         self.signupWin = SignupWindow()
         
     def SignIn(self):
@@ -44,7 +46,8 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
 #        cv2.destroyAllWindows()
 #        print(ID)
         self.close()
-        self.admWin.show()
+        self.readerWin.show()
+       # self.admWin.show()
         
     def SignUp(self):
         self.close()
@@ -247,7 +250,29 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         header.setSectionResizeMode(8, QtWidgets.QHeaderView.Stretch)
         print("GetInfoBBooks")
        
-    
+class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self) #initial design
+        self.setFixedSize(self.size())
+        self.pushButton.clicked.connect(self.GetBook)
+        #tabel 1 with borrowed books
+        self.tableWidget.setColumnCount(6)
+        #disable editing
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        #Рассмотреть возможность вывода обложки книги в таблицу
+        self.tableWidget.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+                                                    "Publisher", "Publication date", "Borrow date"])
+        self.tableWidget.resizeColumnsToContents()
+        #tabel 2 with previously taken books
+        self.tableWidget_2.setColumnCount(7)
+        #disable editing
+        self.tableWidget_2.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableWidget_2.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+                                                    "Publisher", "Publication date", "Borrow date", "Return date"])
+        self.tableWidget_2.resizeColumnsToContents()    
+    def GetBook(self):
+        print("hello")
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
