@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         self.pushButton.setGeometry(QtCore.QRect(40, 320, 321, 71))
         self.pushButton.setObjectName("pushButton")
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(90, 50, 201, 31))
+        self.label_5.setGeometry(QtCore.QRect(110, 30, 201, 31))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.label_5.setFont(font)

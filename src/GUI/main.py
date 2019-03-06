@@ -271,6 +271,7 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         self.tableWidget_2.setHorizontalHeaderLabels(["ID", "Author", "Title", 
                                                     "Publisher", "Publication date", "Borrow date", "Return date"])
         self.tableWidget_2.resizeColumnsToContents()    
+    
     def GetBook(self):
         print("hello")
 
