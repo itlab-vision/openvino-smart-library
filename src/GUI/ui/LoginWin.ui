@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>397</width>
-    <height>456</height>
+    <width>400</width>
+    <height>450</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Smart Library Login</string>
@@ -20,7 +26,7 @@
       <x>40</x>
       <y>290</y>
       <width>321</width>
-      <height>101</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="text">
@@ -33,7 +39,7 @@
       <x>40</x>
       <y>130</y>
       <width>321</width>
-      <height>101</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
@@ -48,9 +54,9 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>40</y>
-      <width>176</width>
+      <x>50</x>
+      <y>50</y>
+      <width>301</width>
       <height>34</height>
      </rect>
     </property>
@@ -61,7 +67,25 @@
      </font>
     </property>
     <property name="text">
-     <string>Smart Library </string>
+     <string>Sign in to Smart Library</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>260</y>
+      <width>301</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>If you are not a member:</string>
     </property>
    </widget>
   </widget>

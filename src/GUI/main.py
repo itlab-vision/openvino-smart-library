@@ -8,6 +8,8 @@ sys.path.insert(0, '../modules')
 import face_recognizer
 import book_recognizer
 
+
+
 class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
     
     def __init__(self):
@@ -16,9 +18,9 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         self.setFixedSize(self.size())
         self.pushButton.clicked.connect(self.SignUp)
         self.pushButton_2.clicked.connect(self.SignIn)  # execute func on button click
-        self.admwin = AdminWindow()
+        self.admWin = AdminWindow()
 #        self.readerwin = ReaderWindow()
-        self.signupwin = SignupWindow()
+        self.signupWin = SignupWindow()
         
     def SignIn(self):
 #        rec = face_recognizer.PVLRecognizer() #передавать через параметры
@@ -42,16 +44,69 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
 #        cv2.destroyAllWindows()
 #        print(ID)
         self.close()
-        self.admwin.show()
+        self.admWin.show()
+        
     def SignUp(self):
         self.close()
-        self.signupwin.show()
+        self.signupWin.show()
 
 class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)  # initial design
         self.setFixedSize(self.size())   
+        self.pushButton.clicked.connect(self.SignUp)
+        self.pushButton.setEnabled(False)
+        
+        self.lineEdit.textChanged.connect(self.EnableBtn)
+        self.lineEdit_2.textChanged.connect(self.EnableBtn)
+        self.lineEdit_3.textChanged.connect(self.EnableBtn)
+        self.lineEdit_4.textChanged.connect(self.EnableBtn)
+        
+         
+    def SignUp(self):
+        self.fName = self.lineEdit.text()
+        self.lName = self.lineEdit_2.text()
+        self.mName = self.lineEdit_3.text()
+        self.phone = self.lineEdit_4.text()
+        
+        #insert user in DB
+        
+        #---------------------
+        rec = face_recognizer.PVLRecognizer() #передавать через параметры
+        rec.Create("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
+        cap = cv2.VideoCapture(0)
+        UID = -10000
+        name = "UNKNOWN"
+        while(True): 
+            _, f = cap.read()
+            (ID, (x, y, w, h)) = rec.Recognize(f)
+            if (ID != UID):
+              name = str(ID) #Можно выводить имя пользователя
+              cv2.putText(f, "You are already a member" , (x-w,y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 208, 86), 2)
+              cv2.putText(f, "Press Q to exit" , (x-w,y+h+50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 208, 86), 2)
+            cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            cv2.putText(f, name , (x+w//2 - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
+            cv2.imshow("web", f)
+            ch = cv2.waitKey(1)
+            if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID != UID:
+                tmp = rec.Register(f, 1) #Необходимо генерировать новый ID
+            if ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
+               break
+        cap.release()
+        cv2.destroyAllWindows()
+        print(ID)
+        self.close()
+        self.loginWin = LoginWindow()
+        self.loginWin.show()
+       
+    
+    def EnableBtn(self):
+        if(len(self.lineEdit.text()) > 0 and  len(self.lineEdit_2.text()) > 0 and
+            len(self.lineEdit_3.text()) > 0 and  len(self.lineEdit_4.text()) > 0 ):
+             self.pushButton.setEnabled(True)
+        else:
+             self.pushButton.setEnabled(False)
         
 class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     def __init__(self):
