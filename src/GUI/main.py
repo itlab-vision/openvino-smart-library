@@ -76,8 +76,9 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         #insert user in DB
         
         #---------------------
-        rec = face_recognizer.PVLRecognizer() #передавать через параметры
-        rec.Create("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
+        rec = face_recognizer.FaceRecognizer.Create("PVL")
+        #rec = face_recognizer.PVLRecognizer() #передавать через параметры
+        rec.Init("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
         cap = cv2.VideoCapture(0)
         UID = -10000
         name = "UNKNOWN"

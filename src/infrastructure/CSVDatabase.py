@@ -2,13 +2,13 @@ import csv # модуль для работы с csv-файлами
 
 from datetime import datetime
 
-from infrastructure.IDatabaseInterfaces import * # импорт всех интерфейсов
+import IDatabaseInterfaces # импорт всех интерфейсов
 
-from data_type.Book import Book
-from data_type.User import User
-from data_type.Role import Role
-from data_type.Author import Author
-from data_type.Model import Model
+from Data_types.Book import Book
+from Data_types.User import User
+from Data_types.Role import Role
+from Data_types.Author import Author
+from Data_types.Model import Model
 
 FileBooksR = open("infrastructure/Books/Books.csv", newline = '')
 FileBooksW = open("infrastructure/Books/Books.csv", "a", newline = '')

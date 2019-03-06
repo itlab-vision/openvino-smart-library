@@ -1,13 +1,20 @@
 import numpy as np
 import ctypes as C
-import cv2
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmetho
 
 class FaceRecognizer(ABC):
-     @abstractmethod
-     def Create(self, path):
-         """Create face recognizer"""
-         
+#     @abstractmethod
+#     def Create(self, path):
+#         """Create face recognizer"""
+     
+     @staticmethod
+     def Create(name):
+         if name == "PVL":
+            rec = PVLRecognizer()
+            return rec
+         else:
+            raise Exception('Error: wrong recognizer name')
+           
      @abstractmethod
      def Register(self, img):
          """Register new reader"""
@@ -18,7 +25,7 @@ class FaceRecognizer(ABC):
          
 class PVLRecognizer(FaceRecognizer):
 
-    def Create(self, path):
+    def Init(self, path):
         try:
           self.PVL = C.cdll.LoadLibrary(path)
         except OSError:
