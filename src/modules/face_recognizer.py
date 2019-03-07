@@ -1,12 +1,8 @@
 import numpy as np
 import ctypes as C
-from abc import ABC, abstractmetho
+from abc import ABC, abstractmethod
 
 class FaceRecognizer(ABC):
-#     @abstractmethod
-#     def Create(self, path):
-#         """Create face recognizer"""
-     
      @staticmethod
      def Create(name):
          if name == "PVL":
@@ -24,7 +20,6 @@ class FaceRecognizer(ABC):
          """Recognize valid user"""
          
 class PVLRecognizer(FaceRecognizer):
-
     def Init(self, path):
         try:
           self.PVL = C.cdll.LoadLibrary(path)
@@ -34,6 +29,11 @@ class PVLRecognizer(FaceRecognizer):
         else:
           return True
       
+    def XMLPath(self, path):
+        p = C.create_string_buffer(bytes(path.encode())) # may be it can be done easier
+        self.PVL.GetPath.argtypes = [C.c_char_p]
+        self.PVL.GetPath(p)
+        
     def Register(self, img, ID):
        return self.PVL.Register(img.shape[0],
                     img.shape[1],
@@ -50,6 +50,9 @@ class PVLRecognizer(FaceRecognizer):
          hptr = C.pointer(h)
          ID = self.PVL.Recognize(img.shape[0],
                             img.shape[1],
-                            img.ctypes.data_as(C.POINTER(C.c_ubyte))
-                            ,xptr,yptr,wptr,hptr)
+                            img.ctypes.data_as(C.POINTER(C.c_ubyte)), 
+                            xptr, yptr, wptr, hptr)
          return (ID, (x.value, y.value, w.value, h.value)) 
+    
+    def GetUID(self):
+        return self.PVL.UnknownID()

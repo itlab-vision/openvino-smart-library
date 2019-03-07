@@ -8,9 +8,14 @@ static int counter = 0;
 static Ptr<FaceDetector> pvlFD;
 static Ptr<FaceRecognizer> pvlFR;
 static bool isOpen = false;
+static string dbPath = "defaultdb.xml";
+
+void GetPath(char* path) {
+	dbPath = (string)path;
+}
 
 int Register(int rows, int cols, unsigned char* imgData, int ID) {
-    const string& dbPath = "defaultdb.xml";
+    //const string& dbPath = "defaultdb.xml";
     
     if (counter == 0) {
         pvlFD = FaceDetector::create();
@@ -81,7 +86,7 @@ int Register(int rows, int cols, unsigned char* imgData, int ID) {
 }
 
 int Recognize(int rows, int cols, unsigned char* imgData, int* x, int* y, int* w, int* h) {
-    const string& dbPath = "defaultdb.xml";
+    //const string& dbPath = "defaultdb.xml";
    
 	if (counter == 0) {
         pvlFD = FaceDetector::create();

@@ -3,3 +3,4 @@ EXPORTS
 Recognize
 Register
 UnknownID
+GetPath

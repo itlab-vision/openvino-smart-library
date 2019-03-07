@@ -77,10 +77,10 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         
         #---------------------
         rec = face_recognizer.FaceRecognizer.Create("PVL")
-        #rec = face_recognizer.PVLRecognizer() #передавать через параметры
         rec.Init("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
+        rec.XMLPath("..\\infrastructure\\database\\facesdb.xml")
         cap = cv2.VideoCapture(0)
-        UID = -10000
+        UID = rec.GetUID()
         name = "UNKNOWN"
         while(True): 
             _, f = cap.read()
@@ -90,10 +90,10 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
               cv2.putText(f, "You are already a member" , (x-w,y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 208, 86), 2)
               cv2.putText(f, "Press Q to exit" , (x-w,y+h+50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 208, 86), 2)
             cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            cv2.putText(f, name , (x+w//2 - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
+            cv2.putText(f, name , (x - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
             cv2.imshow("web", f)
             ch = cv2.waitKey(1)
-            if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID != UID:
+            if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID == UID:
                 tmp = rec.Register(f, 1) #Необходимо генерировать новый ID
             if ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
                break
