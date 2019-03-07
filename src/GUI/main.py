@@ -5,7 +5,7 @@ import LoginWin  #design
 import SignupWin #design
 import AdminWin  #design
 import AdminWin  #design
-import ReaderWin
+import ReaderWin #design
 sys.path.insert(0, '../modules')
 import face_recognizer
 import book_recognizer
