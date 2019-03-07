@@ -19,39 +19,39 @@ void GetPath(char* path) {
 
 int Register(int rows, int cols, unsigned char* imgData, int ID) {
   if (counter == 0) {
-  pvlFD = FaceDetector::create();
-  if (pvlFD.empty()) {
-    cerr << "Error: fail to create PVL face detector" << endl;
-     return -1;
-  }
+    pvlFD = FaceDetector::create();
+    if (pvlFD.empty()) {
+      cerr << "Error: fail to create PVL face detector" << endl;
+       return -1;
+    }
 
-  pvlFR = FaceRecognizer::create();
-  if (pvlFR.empty()) {
-    cerr << "Error: fail to create PVL face recognizer" << endl;
-    return -2;
-  }
-  bool bTracking = false;
+    pvlFR = FaceRecognizer::create();
+    if (pvlFR.empty()) {
+      cerr << "Error: fail to create PVL face recognizer" << endl;
+      return -2;
+    }
+    bool bTracking = false;
 
-  pvlFD->setTrackingModeEnabled(bTracking);
-  pvlFR->setTrackingModeEnabled(bTracking);
+    pvlFD->setTrackingModeEnabled(bTracking);
+    pvlFR->setTrackingModeEnabled(bTracking);
 
-  if (std::ifstream(dbPath)) {
-    pvlFR = Algorithm::load<FaceRecognizer>(dbPath);
-    isOpen = true;
-  }
+    if (std::ifstream(dbPath)) {
+      pvlFR = Algorithm::load<FaceRecognizer>(dbPath);
+      isOpen = true;
+    }
   }
 
   Mat img(rows, cols, CV_8UC3, imgData);
   if (img.empty()) {
-  cerr << "Error: no input image" << endl;
-  return -3;
+    cerr << "Error: no input image" << endl;
+    return -3;
   }
 
   Mat imgGray;
   cvtColor(img, imgGray, COLOR_BGR2GRAY);
   if (imgGray.empty()) {
-  cerr << "Error: no gray image()" << endl;
-  return -4;
+    cerr << "Error: no gray image()" << endl;
+    return -4;
   }
 
   int keyDelay = 0;
@@ -66,13 +66,13 @@ int Register(int rows, int cols, unsigned char* imgData, int ID) {
 
   pvlFD->detectFaceRect(imgGray, faces);
   if (faces.size() == 1) {
-  pvlFR->recognize(imgGray, faces, personIDs, confidence);
+    pvlFR->recognize(imgGray, faces, personIDs, confidence);
     for (uint i = 0; i < personIDs.size(); i++)
     if (personIDs[i] == FACE_RECOGNIZER_UNKNOWN_PERSON_ID) {
       personID = ID;
-       pvlFR->registerFace(imgGray, faces[i], personID, true);
-       pvlFR->save(dbPath);
-       pvlFR = Algorithm::load<FaceRecognizer>(dbPath);
+      pvlFR->registerFace(imgGray, faces[i], personID, true);
+      pvlFR->save(dbPath);
+      pvlFR = Algorithm::load<FaceRecognizer>(dbPath);
     }
   }
   return personID;
@@ -103,11 +103,11 @@ int Recognize(int rows, int cols, unsigned char* imgData,
     }
   }
 
-  if (std::ifstream(dbPath) && isOpen == false)
+  if (std::ifstream(dbPath) && isOpen == false) {
     pvlFR = Algorithm::load<FaceRecognizer>(dbPath);
-  else
+  } else {
     isOpen = true;
-
+  }
   Mat img(rows, cols, CV_8UC3, imgData);
   if (img.empty()) {
     cerr << "Error: no input image" << endl;

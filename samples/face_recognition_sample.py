@@ -13,7 +13,6 @@ cap = cv2.VideoCapture(0)
 UID = rec.GetUID()
 rec.XMLPath("defaultdb.xml")
 name = "UNKNOWN"
-
 while(True): 
     _, f = cap.read()
     (ID, (x, y, w, h)) = rec.Recognize(f)
