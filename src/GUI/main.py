@@ -6,9 +6,13 @@ import SignupWin #design
 import AdminWin  #design
 import AdminWin  #design
 import ReaderWin
-sys.path.insert(0, '../modules')
+sys.path.insert(0, "../modules")
 import face_recognizer
 import book_recognizer
+sys.path.insert(0, "../infrastructure")
+from CSVDatabase import *
+from Data_types.User import *
+from Data_types.Book import *
 
 
 
@@ -46,8 +50,12 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
 #        cv2.destroyAllWindows()
 #        print(ID)
         self.close()
-        self.readerWin.show()
-       # self.admWin.show()
+        CSV = CSVDatabase()
+        role = (CSV.GetUser(ID))[1]
+        if (int(role.role_id) == 1):
+            self.readerWin.show()
+        else:
+            self.admWin.show()
         
     def SignUp(self):
         self.close()
@@ -93,7 +101,7 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
             cv2.imshow("web", f)
             ch = cv2.waitKey(1)
             if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID != UID:
-                tmp = rec.Register(f, 1) #Необходимо генерировать новый ID
+                tmp = rec.Register(f, NumOfLines("../infrastructure/Database/Users/Users.csv")) #Необходимо генерировать новый ID
             if ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
                break
         cap.release()
@@ -160,22 +168,25 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     
     def GetInfoReaders(self):
         self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(6)
+        self.tableWidget.setColumnCount(5)
          #disable editing
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Last name", "First name", 
-                                                     "Middle name", "Phone", "Role"])
+        self.tableWidget.setHorizontalHeaderLabels(["ID", "Phone", "First name",
+                                                     "Last name", "Middle name"])
         #insert row
         self.tableWidget.verticalHeader().hide()
-        rowPosition = self.tableWidget.rowCount()
-        self.tableWidget.insertRow(rowPosition)
-        self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem("1"))
-        self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem("Вихрев"))
-        self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem("Иван"))
-        self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem("Борисович"))
-        self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem("+00000000000"))
-        self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem("Administrator"))
+        
+        CSV = CSVDatabase()
+        User = CSV.GetAllUsers()
+        for i in enumerate(User):
+            rowPosition = self.tableWidget.rowCount()
+            self.tableWidget.insertRow(rowPosition)
+            self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+            self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+            self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+            self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+            self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
         #fit available space
         header = self.tableWidget.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
@@ -197,14 +208,26 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
                                                      "Publisher", "Publication date", "Cover"])
         #insert row
         self.tableWidget.verticalHeader().hide()
-        rowPosition = self.tableWidget.rowCount()
-        self.tableWidget.insertRow(rowPosition)
-        self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem("1"))
-        self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem("---"))
+        
+        CSV = CSVDatabase()
+        Book = CSV.GetAllBooks()
+        for i in enumerate(Book):
+            c = ", " # строка для разделения авторов
+            rowPosition = self.tableWidget.rowCount()
+            self.tableWidget.insertRow(rowPosition)
+            self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
+            authorsStr = "" # строка для размещения в ней ФИО авторов
+            for j in enumerate(Book[i[0]].authors):
+                if (j[0] == len(Book[i[0]].authors) - 1):
+                    c = ''
+                authorsStr += (Book[i[0]].authors[j[0]].first_name + ' ' +
+                            Book[i[0]].authors[j[0]].last_name + ' ' +
+                            Book[i[0]].authors[j[0]].middle_name + c)
+            self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
+            self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[i[0]].title))
+            self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[i[0]].publisher))
+            self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[i[0]].year))
+            self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(Book[i[0]].file_path))
         #fit available space
         header = self.tableWidget.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
@@ -221,22 +244,30 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         #disable editing
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Last name", "First name", 
-                                                     "Middle name", "Phone", "Author", "Title", "Borrow date",
+        self.tableWidget.setHorizontalHeaderLabels(["User ID", "Book ID", "First name", "Last name",
+                                                     "Middle name", "Phone", "Title", "Borrow date",
                                                      "Return date"])
         #insert row
         self.tableWidget.verticalHeader().hide()
-        rowPosition = self.tableWidget.rowCount()
-        self.tableWidget.insertRow(rowPosition)
-        self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem("1"))
-        self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 7, QtWidgets.QTableWidgetItem("---"))
-        self.tableWidget.setItem(rowPosition, 8, QtWidgets.QTableWidgetItem("---"))
+        
+        CSV = CSVDatabase()
+        BBook = CSV.GetBorrowedBooks()
+        Book = BBook[0]
+        DateB = BBook[1]
+        DateR = BBook[2]
+        User = BBook[3]
+        for i in enumerate(DateB):
+            rowPosition = self.tableWidget.rowCount()
+            self.tableWidget.insertRow(rowPosition)
+            self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+            self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
+            self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+            self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+            self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+            self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+            self.tableWidget.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(Book[i[0]].title))
+            self.tableWidget.setItem(rowPosition, 7, QtWidgets.QTableWidgetItem(DateB[i[0]]))
+            self.tableWidget.setItem(rowPosition, 8, QtWidgets.QTableWidgetItem(DateR[i[0]]))
         #fit available space
         header = self.tableWidget.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
