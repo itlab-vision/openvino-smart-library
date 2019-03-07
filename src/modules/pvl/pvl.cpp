@@ -147,7 +147,6 @@ int Recognize(int rows, int cols, unsigned char* imgData,
   return personID;
 }
 
-
 int UnknownID() {
   return FACE_RECOGNIZER_UNKNOWN_PERSON_ID;
 }
