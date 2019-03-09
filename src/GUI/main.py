@@ -1,4 +1,5 @@
 import sys, os
+import numpy as np
 import cv2
 from PyQt5 import QtWidgets, QtCore, QtGui
 import LoginWin  #design
@@ -25,26 +26,33 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         self.signupWin = SignupWindow()
         
     def SignIn(self):
-#        rec = face_recognizer.PVLRecognizer() #передавать через параметры
-#        rec.Create("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
-#        cap = cv2.VideoCapture(0)
-#        UID = -10000
-#        name = "UNKNOWN"
-#        while(True): 
-#            _, f = cap.read()
-#            (ID, (x, y, w, h)) = rec.Recognize(f)
-#            if (ID != UID):
-#              name = str(ID)
-#            cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
-#            cv2.putText(f, name , (x,y-2), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
-#            cv2.imshow("web", f)
-#            ch = cv2.waitKey(1)
-#            if ID != -10000:
-#                break
-#        ch = cv2.waitKey(1000)
-#        cap.release()
-#        cv2.destroyAllWindows()
-#        print(ID)
+        rec = face_recognizer.FaceRecognizer.Create("PVL")
+        rec.Init("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
+        rec.XMLPath("..\\infrastructure\\database\\facesdb.xml")
+        cap = cv2.VideoCapture(0)
+        UID = rec.GetUID()
+        name = "UNKNOWN"
+        ch = 0
+        while(True): 
+            _, f = cap.read()
+            (ID, (x, y, w, h)) = rec.Recognize(f)
+            if (ID != UID):
+              name = str(ID)
+            cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            cv2.putText(f, name , (x,y-2), 
+                          cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
+            if ID != UID or ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
+                break
+            else:
+                cv2.putText(f, "You are not a member." , (135, 460),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 1) 
+            cv2.imshow("web", f)
+            ch = cv2.waitKey(1) 
+        
+        h = cv2.waitKey(1000)
+        cap.release()
+        cv2.destroyAllWindows()
+        print(ID)
         self.close()
         self.readerWin.show()
        # self.admWin.show()
@@ -77,8 +85,8 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         
         #---------------------
         rec = face_recognizer.FaceRecognizer.Create("PVL")
-        rec.Init("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
-        rec.XMLPath("..\\infrastructure\\database\\facesdb.xml")
+        rec.Init("../modules/pvl/build/Release/PVL_wrapper.dll") # передавать через параметры
+        rec.XMLPath("../infrastructure/database/facesdb.xml")
         cap = cv2.VideoCapture(0)
         UID = rec.GetUID()
         name = "UNKNOWN"
@@ -87,8 +95,8 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
             (ID, (x, y, w, h)) = rec.Recognize(f)
             if (ID != UID):
               name = str(ID) #Можно выводить имя пользователя
-              cv2.putText(f, "You are already a member" , (x-w,y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 208, 86), 2)
-              cv2.putText(f, "Press Q to exit" , (x-w,y+h+50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 208, 86), 2)
+              cv2.putText(f, "You are already a member. Press Q to exit" , (10,460), 
+                                        cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
             cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
             cv2.putText(f, name , (x - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
             cv2.imshow("web", f)
