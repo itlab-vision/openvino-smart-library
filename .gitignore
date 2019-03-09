@@ -104,4 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # db for face_recognition
-defaultdb.xml
+*.xml

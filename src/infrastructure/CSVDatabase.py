@@ -3,7 +3,6 @@ import csv # модуль для работы с csv-файлами
 from datetime import datetime
 
 from IDatabaseInterfaces import IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI # импорт всех интерфейсов
-
 from Data_types.Book import Book
 from Data_types.User import User
 from Data_types.Role import Role
