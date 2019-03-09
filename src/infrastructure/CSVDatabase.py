@@ -2,28 +2,27 @@ import csv # модуль для работы с csv-файлами
 
 from datetime import datetime
 
-import IDatabaseInterfaces # импорт всех интерфейсов
-
+from IDatabaseInterfaces import IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI # импорт всех интерфейсов
 from Data_types.Book import Book
 from Data_types.User import User
 from Data_types.Role import Role
 from Data_types.Author import Author
 from Data_types.Model import Model
 
-FileBooksR = open("infrastructure/Books/Books.csv", newline = '')
-FileBooksW = open("infrastructure/Books/Books.csv", "a", newline = '')
-FileUsersR = open("infrastructure/Users/Users.csv", newline = '')
-FileUsersW = open("infrastructure/Users/Users.csv", "a", newline = '') # "a" - дозапись в файл, "w" - перезапись файла
-FileUserRoleR = open("infrastructure/Users/UserRole.csv", newline = '')
-FileRolesR = open("infrastructure/Users/Roles.csv", newline = '')
-FileAuthorsR = open("infrastructure/Books/Authors.csv", newline = '')
-FileAuthorsW = open("infrastructure/Books/Authors.csv", "a", newline = '')
-FileAuthorshipR = open("infrastructure/Books/Authorship.csv", newline = '')
-FileAuthorshipW = open("infrastructure/Books/Authorship.csv", "a", newline = '')
-FileModelsR = open("infrastructure/Users/Models.csv", newline = '')
-FileModelsW = open("infrastructure/Users/Models.csv", "a", newline = '')
-FileReadersR = open("infrastructure/Readers.csv", newline = '')
-FileReadersW = open("infrastructure/Readers.csv", "a", newline = '')
+FileBooksR = open("../infrastructure/Database/Books/Books.csv", newline = '')
+FileBooksW = open("../infrastructure/Database/Books/Books.csv", "a", newline = '')
+FileUsersR = open("../infrastructure/Database/Users/Users.csv", newline = '')
+FileUsersW = open("../infrastructure/Database/Users/Users.csv", "a", newline = '') # "a" - дозапись в файл, "w" - перезапись файла
+FileUserRoleR = open("../infrastructure/Database/Users/UserRole.csv", newline = '')
+FileRolesR = open("../infrastructure/Database/Users/Roles.csv", newline = '')
+FileAuthorsR = open("../infrastructure/Database/Books/Authors.csv", newline = '')
+FileAuthorsW = open("../infrastructure/Database/Books/Authors.csv", "a", newline = '')
+FileAuthorshipR = open("../infrastructure/Database/Books/Authorship.csv", newline = '')
+FileAuthorshipW = open("../infrastructure/Database/Books/Authorship.csv", "a", newline = '')
+FileModelsR = open("../infrastructure/Database/Users/Models.csv", newline = '')
+FileModelsW = open("../infrastructure/Database/Users/Models.csv", "a", newline = '')
+FileReadersR = open("../infrastructure/Database/Readers.csv", newline = '')
+FileReadersW = open("../infrastructure/Database/Readers.csv", "a", newline = '')
 
 # ПРИМЕЧАНИЕ: для корректной работы методов оформляйте строки в БД правильно.
 # При записи любых данных в файлы БД вручную обязательно в конце сделать перевод строки на новую!
