@@ -18,7 +18,7 @@ from CSVDatabase import *
 from Data_types.User import *
 from Data_types.Book import *
 
-
+ID = 0
 
 class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
     
