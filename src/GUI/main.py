@@ -2,11 +2,14 @@ import sys, os
 import numpy as np
 import cv2
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtGui import QIcon, QPixmap
 import LoginWin  #design
 import SignupWin #design
 import AdminWin  #design
 import AdminWin  #design
 import ReaderWin #design
+import BookWin #design
 sys.path.insert(0, '../modules')
 import face_recognizer
 import book_recognizer
@@ -25,10 +28,11 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         self.setFixedSize(self.size())
         self.pushButton.clicked.connect(self.SignUp)
         self.pushButton_2.clicked.connect(self.SignIn)  # execute func on button click
+        
         self.admWin = AdminWindow()
         self.readerWin = ReaderWindow()
         self.signupWin = SignupWindow()
-        
+    """Пофиксить работу БД при входе"""    
     def SignIn(self):
         rec = face_recognizer.FaceRecognizer.Create("PVL")
         rec.Init("..\\modules\\pvl\\build\\Release\\PVL_wrapper.dll") # передавать через параметры
@@ -37,33 +41,35 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         UID = rec.GetUID()
         name = "UNKNOWN"
         ch = 0
+        CSV = CSVDatabase()
         while(True): 
             _, f = cap.read()
             (ID, (x, y, w, h)) = rec.Recognize(f)
+            print(ID)
             if (ID != UID):
-              name = str(ID)
+              name = (CSV.GetUser(ID))[0].first_name
+              print(name)
+            else:
+               cv2.putText(f, "You are not a member." , (135, 460),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 1)  
             cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
             cv2.putText(f, name , (x,y-2), 
                           cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
+            cv2.imshow("web", f)
             if ID != UID or ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
                 break
-            else:
-                cv2.putText(f, "You are not a member." , (135, 460),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 1) 
-            cv2.imshow("web", f)
             ch = cv2.waitKey(1) 
-        
         h = cv2.waitKey(1000)
         cap.release()
         cv2.destroyAllWindows()
-        print(ID)
-        self.close()
-        CSV = CSVDatabase()
-        role = (CSV.GetUser(ID))[1]
-        if (int(role.role_id) == 1):
-            self.readerWin.show()
-        else:
-            self.admWin.show()
+        if (ID != UID):
+            CSV = CSVDatabase()
+            role = (CSV.GetUser(ID))[1]
+            self.close()
+            if (int(role.role_id) == 1):
+                self.readerWin.show()
+            else:
+                self.admWin.show()
         
     def SignUp(self):
         self.close()
@@ -82,15 +88,20 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         self.lineEdit_3.textChanged.connect(self.EnableBtn)
         self.lineEdit_4.textChanged.connect(self.EnableBtn)
         
-         
+    """Проверить реализацию записи пользователя в БД"""
     def SignUp(self):
-        self.fName = self.lineEdit.text()
-        self.lName = self.lineEdit_2.text()
-        self.mName = self.lineEdit_3.text()
-        self.phone = self.lineEdit_4.text()
-        
+        CSV = CSVDatabase()
+        fName = self.lineEdit.text() # first name 
+        lName = self.lineEdit_2.text() # last name
+        mName = self.lineEdit_3.text() # middle name
+        phone = self.lineEdit_4.text() 
         #insert user in DB
-        
+        newID = NumOfLines("../infrastructure/Database/Users/Users.csv")
+        print(newID)
+        user = User(newID, phone, fName, lName, mName)
+        user._print()
+        print(CSV.AddUser(user))
+#        print(NumOfLines("../infrastructure/Database/Users/Users.csv"))
         #---------------------
         rec = face_recognizer.FaceRecognizer.Create("PVL")
         rec.Init("../modules/pvl/build/Release/PVL_wrapper.dll") # передавать через параметры
@@ -109,10 +120,11 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
             cv2.putText(f, name , (x - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
             cv2.imshow("web", f)
             ch = cv2.waitKey(1)
-            if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID != UID:
-                tmp = rec.Register(f, NumOfLines("../infrastructure/Database/Users/Users.csv")) #Необходимо генерировать новый ID
+            if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID == UID:
+                checkID = rec.Register(f,  newID) #Необходимо генерировать новый ID
+                break
             if ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
-               break
+                break
         cap.release()
         cv2.destroyAllWindows()
         print(ID)
@@ -173,6 +185,8 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
 
         
     def AddBook(self):
+        self.bookWin = BookWindow()
+        self.bookWin.show()
         print("AddBook")
     
     def GetInfoReaders(self):
@@ -189,6 +203,7 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         CSV = CSVDatabase()
         User = CSV.GetAllUsers()
         for i in enumerate(User):
+            print(i[0])
             rowPosition = self.tableWidget.rowCount()
             self.tableWidget.insertRow(rowPosition)
             self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
@@ -315,6 +330,59 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
     def GetBook(self):
         print("hello")
 
+class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)  # initial design
+        self.setFixedSize(self.size())
+        self.pushButton_add.clicked.connect(self.Add)
+        self.pushButton_add.setEnabled(False)
+        self.pushButton.clicked.connect(self.OpenFile)
+        self.pushButton.setEnabled(False)
+        self.lineEdit_name.textChanged.connect(self.EnableBtn1)
+        self.lineEdit_title.textChanged.connect(self.EnableBtn2)
+        self.lineEdit_author.textChanged.connect(self.EnableBtn2)
+        self.lineEdit_publisher.textChanged.connect(self.EnableBtn2)
+        self.lineEdit_date.textChanged.connect(self.EnableBtn2)
+    """сделать запись в БД"""    
+    def Add(self):
+        title = self.lineEdit_title.text()
+        author = self.lineEdit_author.text()
+        publisher = self.lineEdit_publisher.text()
+        date = self.lineEdit_date.text()
+        coverName = self.lineEdit_name.text()
+        self.Cover.save("../infrastructure/Database/Books/Covers/" + coverName + ".png")
+        print(title, " ", author, " ", publisher, " ", date)
+        print("add")
+        self.close()
+        
+    """Добавить путь до обложки в БД
+       В функции добавления новой обложки необходимо реализовать именование обложек
+        в соответствии с БД, проверять имя на уникальность и т.д"""
+    def OpenFile(self):
+        fileName = QFileDialog.getOpenFileName(self.label_pix, 
+                                                     'Open File',"",
+                                                     "Images (*.png *.jpg *.jpeg *.bmp *.gif)")
+        """Pixmap - показываем миниатюру картинки на экране загрузки 
+           self.Cover - сохраняем полную картинку, чтобы потом ее записать в нужную папку"""
+        pixmap = QPixmap(fileName[0])
+        self.Cover = pixmap 
+        pixmap = pixmap.scaled(self.label_pix.width(), self.label_pix.height(), QtCore.Qt.KeepAspectRatio)
+        self.label_pix.setPixmap(pixmap)
+        print("open")
+        
+    def EnableBtn1(self):
+        if len(self.lineEdit_name.text()) > 0:
+             self.pushButton.setEnabled(True)
+        else:
+             self.pushButton.setEnabled(False)
+             
+    def EnableBtn2(self):
+        if(len(self.lineEdit_title.text()) > 0 and  len(self.lineEdit_author.text()) > 0 and
+            len(self.lineEdit_publisher.text()) > 0 and  len(self.lineEdit_date.text()) > 0 ):
+             self.pushButton_add.setEnabled(True)
+        else:
+             self.pushButton_add.setEnabled(False)   
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
     window = LoginWindow()  
