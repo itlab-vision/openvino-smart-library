@@ -116,6 +116,9 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
               name = str(ID) #Можно выводить имя пользователя
               cv2.putText(f, "You are already a member. Press Q to exit" , (10,460), 
                                         cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
+            else:
+              cv2.putText(f, "Press R to register" , (10,460), 
+                                        cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
             cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
             cv2.putText(f, name , (x - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
             cv2.imshow("web", f)
