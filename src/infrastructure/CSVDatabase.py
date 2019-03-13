@@ -69,12 +69,9 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
         fieldnames = ['user_id', 'phone', 'first_name', 'last_name', 'middle_name']
         writer = csv.DictWriter(FileUsersW, fieldnames = fieldnames, delimiter = ',')
         writer.writerow({'user_id': new_user_id, 'phone': user.phone, 'first_name': user.first_name, 'last_name': user.last_name, 'middle_name': user.middle_name})
-<<<<<<< HEAD
-=======
         
         FileUsersR.close()
         FileUsersW.close()
->>>>>>> 4ea1f62c51bbcac7b8f7484585ef61e1224048ca
         return new_user_id
     
     
@@ -140,15 +137,11 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
             if ((book.title == line["title"]) and (book.year == line["year"]) and (book.publisher == line["publisher"])):
                 FileBooksR.close()
                 return -1
-<<<<<<< HEAD
-        new_book_id = NumOfLines("../infrastructure/Database/Books/Books.csv") # id новой книги = числу строк в файле Books.csv
-=======
         FileBooksW = open("../infrastructure/Database/Books/Books.csv", "a", newline = '')
         FileAuthorshipW = open("../infrastructure/Database/Books/Authorship.csv", "a", newline = '')
         FileAuthorsR = open("../infrastructure/Database/Books/Authors.csv", newline = '')
         FileAuthorsW = open("../infrastructure/Database/Books/Authors.csv", "a", newline = '')
         new_book_id = NumOfLines("infrastructure/Books/Books.csv") # id новой книги = числу строк в файле Books.csv
->>>>>>> 4ea1f62c51bbcac7b8f7484585ef61e1224048ca
         # в таблицу книг дописываю одну новую:
         fieldnamesBooks = ['book_id', 'file_path', 'title', 'year', 'publisher']
         writerBooks = csv.DictWriter(FileBooksW, fieldnames = fieldnamesBooks, delimiter = ',')
