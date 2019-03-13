@@ -99,6 +99,7 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         newID = NumOfLines("../infrastructure/Database/Users/Users.csv")
         print("new ID = ", newID)
         print("User:")
+        user = User(newID, phone, fName, lName, mName)
         user._print()
         print("Result:")
         print(CSV.AddUser(user))
