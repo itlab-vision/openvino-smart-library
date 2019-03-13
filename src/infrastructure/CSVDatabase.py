@@ -69,12 +69,11 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
         for line in reader:
             if ((user.first_name == line["first_name"]) and (user.last_name == line["last_name"]) and (user.middle_name == line["middle_name"]) and (user.phone == line["phone"])):
                 return -1
-        new_user_id = NumOfLines("infrastructure/Users/Users.csv") # id нового пользователя = числу строк в файле Users.csv
+        new_user_id = NumOfLines("../infrastructure/Database/Users/Users.csv") # id нового пользователя = числу строк в файле Users.csv
         #
         fieldnames = ['user_id', 'phone', 'first_name', 'last_name', 'middle_name']
         writer = csv.DictWriter(FileUsersW, fieldnames = fieldnames, delimiter = ',')
         writer.writerow({'user_id': new_user_id, 'phone': user.phone, 'first_name': user.first_name, 'last_name': user.last_name, 'middle_name': user.middle_name})
-        
         return new_user_id
     
     
@@ -128,7 +127,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
             # file_path не сравниваю, т.к. могут быть 2 разных фото одной книги
             if ((book.title == line["title"]) and (book.year == line["year"]) and (book.publisher == line["publisher"])):
                 return -1
-        new_book_id = NumOfLines("infrastructure/Books/Books.csv") # id новой книги = числу строк в файле Books.csv
+        new_book_id = NumOfLines("../infrastructure/Database/Books/Books.csv") # id новой книги = числу строк в файле Books.csv
         # в таблицу книг дописываю одну новую:
         fieldnamesBooks = ['book_id', 'file_path', 'title', 'year', 'publisher']
         writerBooks = csv.DictWriter(FileBooksW, fieldnames = fieldnamesBooks, delimiter = ',')
@@ -148,7 +147,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
                     new_author_id = line["author_id"]
             # если нет, то вычислим новый author_id и занесём автора в базу
             if (new_author_id == 0):
-                new_author_id = NumOfLines("infrastructure/Books/Authors.csv")
+                new_author_id = NumOfLines("../infrastructure/Database/Books/Authors.csv")
                 writerAuthors.writerow({'author_id': new_author_id, 'first_name': aut.first_name, 'last_name': aut.last_name, 'middle_name': aut.middle_name})
             writerAuthorship.writerow({'book_id': new_book_id, 'author_id': new_author_id})
         

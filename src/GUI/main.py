@@ -97,9 +97,10 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         phone = self.lineEdit_4.text() 
         #insert user in DB
         newID = NumOfLines("../infrastructure/Database/Users/Users.csv")
-        print(newID)
-        user = User(newID, phone, fName, lName, mName)
+        print("new ID = ", newID)
+        print("User:")
         user._print()
+        print("Result:")
         print(CSV.AddUser(user))
 #        print(NumOfLines("../infrastructure/Database/Users/Users.csv"))
         #---------------------
@@ -130,7 +131,6 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
                 break
         cap.release()
         cv2.destroyAllWindows()
-        print(ID)
         self.close()
         self.loginWin = LoginWindow()
         self.loginWin.show()
