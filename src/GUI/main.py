@@ -206,7 +206,6 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         CSV = CSVDatabase()
         User = CSV.GetAllUsers()
         for i in enumerate(User):
-            print(i[0])
             rowPosition = self.tableWidget.rowCount()
             self.tableWidget.insertRow(rowPosition)
             self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
