@@ -156,29 +156,33 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     
     def GetBook(self):
         rec = book_recognizer.Recognizer()
-        rec.Create("SURF")
+        rec.Create("ORB")
 #        #---Функция БД, присваивающая templ список с изображениями обложек-----------
         templ = [ os.path.join("../infrastructure/Database/Books/Covers/", b) 
                 for b in os.listdir("../infrastructure/Database/Books/Covers/")
                  if os.path.isfile(os.path.join("../infrastructure/Database/Books/Covers/", b)) ]
         #-----------------------------------------------------------------------------
-        #---Получить видеопоток с камеры----------------------------------------------
         cap = cv2.VideoCapture(0)
-        #-----------------------------------------------------------------------------
         i = 0
         l = len(templ)
         res_arr = []
+        _, frame = cap.read()
+        ym, xm, _ = frame.shape
         for i in range(l):
             res_arr.append(0)
+        
+        
         while(True): 
             _, frame = cap.read()
+            crop_frame = frame[ym//2 - 170 : ym//2 + 170, xm//2 - 120 : xm//2 + 120]
+            cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), (xm//2 + 110, ym//2 + 150), (0, 255, 255))
             cv2.imshow("web", frame)
-            ch = cv2.waitKey(1)   
-            recognize_result = rec.Recognize(frame, templ, 0.87)
+            cv2.waitKey(1)   
+            recognize_result = rec.Recognize(crop_frame, templ, 0.7)
             print(res_arr, "\n")
             for i in range(l):
                 res_arr[i] = res_arr[i] + recognize_result[i]
-            if max(res_arr) > 8000:
+            if max(res_arr) > 1000:
                 break
         print(res_arr, "\n")
         cap.release()
@@ -206,7 +210,6 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         CSV = CSVDatabase()
         User = CSV.GetAllUsers()
         for i in enumerate(User):
-            print(i[0])
             rowPosition = self.tableWidget.rowCount()
             self.tableWidget.insertRow(rowPosition)
             self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))

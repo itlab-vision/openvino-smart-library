@@ -33,16 +33,16 @@ class Recognizer(BookRecognizer):
             
     def Recognize(self, frame, tpls, coeff):
         arr = []
-        
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        kp_frame, des_frame = self.det.detectAndCompute(frame_gray, None)
+
         for t in tpls:
             tpl = cv2.imread(t)
             matcher = cv2.BFMatcher()
-            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             tpl_gray = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
             
-            kp_frame, des_frame = self.det.detectAndCompute(frame_gray, None)
             kp_tpl, des_tpl = self.det.detectAndCompute(tpl_gray, None)
-            
+        
             matches = matcher.knnMatch(des_tpl, des_frame, k = 2)
             good = []
             
@@ -51,5 +51,5 @@ class Recognizer(BookRecognizer):
                     good.append(m)
                     
             arr.append(len(good))
-            
+        
         return arr
