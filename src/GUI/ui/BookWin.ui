@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
+    <width>730</width>
     <height>413</height>
    </rect>
   </property>
@@ -36,98 +36,6 @@
     </property>
     <property name="text">
      <string>Add a new book</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>100</y>
-      <width>61</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Title :</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>150</y>
-      <width>68</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Author :</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>200</y>
-      <width>101</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Publisher :</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>250</y>
-      <width>131</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Publication date :</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_title">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>100</y>
-      <width>221</width>
-      <height>25</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_author">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>150</y>
-      <width>221</width>
-      <height>25</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_publisher">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>200</y>
-      <width>221</width>
-      <height>25</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="lineEdit_date">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>250</y>
-      <width>201</width>
-      <height>25</height>
-     </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_add">
@@ -169,28 +77,69 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>20</y>
-      <width>68</width>
-      <height>19</height>
+      <x>160</x>
+      <y>70</y>
+      <width>291</width>
+      <height>221</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Name :</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLineEdit" name="lineEdit_title"/>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEdit_author"/>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEdit_publisher"/>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEdit_date"/>
+     </item>
+    </layout>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_name">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>20</y>
-      <width>210</width>
-      <height>25</height>
+      <x>30</x>
+      <y>80</y>
+      <width>121</width>
+      <height>201</height>
      </rect>
     </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Title :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Author :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Publisher :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Publication date :</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
