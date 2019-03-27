@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 class FaceRecognizer(ABC):
      @staticmethod
-     def Create(name):
+     def create(name):
          if name == "PVL":
             rec = PVLRecognizer()
             return rec
@@ -12,15 +12,15 @@ class FaceRecognizer(ABC):
             raise Exception('Error: wrong recognizer name')
            
      @abstractmethod
-     def Register(self, img):
+     def register(self, img):
          """Register new reader"""
          
      @abstractmethod
-     def Recognize(self, img):
+     def recognize(self, img):
          """Recognize valid user"""
          
 class PVLRecognizer(FaceRecognizer):
-    def Init(self, path):
+    def init(self, path):
         try:
           self.PVL = C.cdll.LoadLibrary(path)
         except OSError:
@@ -34,12 +34,12 @@ class PVLRecognizer(FaceRecognizer):
         self.PVL.GetPath.argtypes = [C.c_char_p]
         self.PVL.GetPath(p)
         
-    def Register(self, img, ID):
+    def register(self, img, ID):
        return self.PVL.Register(img.shape[0],
                     img.shape[1],
                     img.ctypes.data_as(C.POINTER(C.c_ubyte)), ID)
        
-    def Recognize(self, img):
+    def recognize(self, img):
          x =  C.c_int(0)
          xptr = C.pointer(x)
          y = C.c_int(0)
@@ -54,5 +54,5 @@ class PVLRecognizer(FaceRecognizer):
                             xptr, yptr, wptr, hptr)
          return (ID, (x.value, y.value, w.value, h.value)) 
     
-    def GetUID(self):
+    def getUID(self):
         return self.PVL.UnknownID()

@@ -20,16 +20,16 @@ from Data_types.User import *
 from Data_types.Book import *
 
 #Global user ID
-ID = 0
+#ID = 0
 #Face Recgonizer dependencies
 FRName = "PVL"
-dllpath = "modules/pvl/build/Release/PVL_wrapper.dll"
-dbpath = "infrastructure/database/facesdb.xml"
+dllPath = "modules/pvl/build/Release/PVL_wrapper.dll"
+dbPath = "infrastructure/database/facesdb.xml"
 #Book Recognizer dependencies
 BRName = "ORB"
 
 #Data base files
-UsersTable = "infrastructure/Database/Users/Users.csv"
+usersTable = "infrastructure/Database/Users/Users.csv"
 
 class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
     
@@ -37,24 +37,22 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)  # initial design
         self.setFixedSize(self.size())
-        self.pushButton.clicked.connect(self.SignUp)
-        self.pushButton_2.clicked.connect(self.SignIn)  # execute func on button click
-        self.admWin = AdminWindow()
-        self.readerWin = ReaderWindow()
+        self.btnSignUp.clicked.connect(self.SignUp)
+        self.btnSignIn.clicked.connect(self.SignIn)  # execute func on button click
         self.signupWin = SignupWindow()
     """Пофиксить работу БД при входе"""    
     def SignIn(self):
-        rec = face_recognizer.FaceRecognizer.Create(FRName)
-        rec.Init(dllpath) # передавать через параметры
-        rec.XMLPath(dbpath)
+        rec = face_recognizer.FaceRecognizer.create(FRName)
+        rec.init(dllPath) # передавать через параметры
+        rec.XMLPath(dbPath)
         cap = cv2.VideoCapture(0)
-        UID = rec.GetUID()
+        UID = rec.getUID()
         name = "UNKNOWN"
         ch = 0
         CSV = CSVDatabase()
         while(True): 
             _, f = cap.read()
-            (ID, (x, y, w, h)) = rec.Recognize(f)
+            (ID, (x, y, w, h)) = rec.recognize(f)
             print(ID)
             if (ID != UID):
               name = (CSV.GetUser(ID))[0].first_name
@@ -77,9 +75,11 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
             role = (CSV.GetUser(ID))[1]
             self.close()
             if (int(role.role_id) == 1):
+                self.readerWin = ReaderWindow(ID)
                 self.readerWin.show()
             else:
-                self.admWin.show()
+                self.adminWin = AdminWindow(ID)
+                self.adminWin.show()
         
     def SignUp(self):
         self.close()
@@ -90,23 +90,23 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)  # initial design
         self.setFixedSize(self.size())   
-        self.pushButton.clicked.connect(self.SignUp)
-        self.pushButton.setEnabled(False)
+        self.btnSignUp.clicked.connect(self.SignUp)
+        self.btnSignUp.setEnabled(False)
         
-        self.lineEdit.textChanged.connect(self.EnableBtn)
-        self.lineEdit_2.textChanged.connect(self.EnableBtn)
-        self.lineEdit_3.textChanged.connect(self.EnableBtn)
-        self.lineEdit_4.textChanged.connect(self.EnableBtn)
+        self.lineEditFName.textChanged.connect(self.EnableBtn)
+        self.lineEditLName.textChanged.connect(self.EnableBtn)
+        self.lineEditMName.textChanged.connect(self.EnableBtn)
+        self.lineEditPhone.textChanged.connect(self.EnableBtn)
         
     """Проверить реализацию записи пользователя в БД"""
     def SignUp(self):
         CSV = CSVDatabase()
-        fName = self.lineEdit.text() # first name 
-        lName = self.lineEdit_2.text() # last name
-        mName = self.lineEdit_3.text() # middle name
-        phone = self.lineEdit_4.text() 
+        fName = self.lineEditFName.text() # first name 
+        lName = self.lineEditLName.text() # last name
+        mName = self.lineEditMName.text() # middle name
+        phone = self.lineEditPhone.text() 
         #insert user in DB
-        newID = NumOfLines(UsersTable)
+        newID = NumOfLines(usersTable)
         print("new ID = ", newID)
         print("User:")
         user = User(newID, phone, fName, lName, mName)
@@ -116,28 +116,29 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
 #        print(NumOfLines("../infrastructure/Database/Users/Users.csv"))
         #---------------------
 #        Сделать инициализацию детектора только один раз?
-        rec = face_recognizer.FaceRecognizer.Create(FRName)
-        rec.Init(dllpath) # передавать через параметры
-        rec.XMLPath(dbpath)
+        rec = face_recognizer.FaceRecognizer.create(FRName)
+        rec.init(dllPath) # передавать через параметры
+        rec.XMLPath(dbPath)
         cap = cv2.VideoCapture(0)
-        UID = rec.GetUID()
+        UID = rec.getUID()
         name = "UNKNOWN"
         while(True): 
             _, f = cap.read()
-            (ID, (x, y, w, h)) = rec.Recognize(f)
+            (ID, (x, y, w, h)) = rec.recognize(f)
             if (ID != UID):
               name = str(ID) #Можно выводить имя пользователя
               cv2.putText(f, "You are already a member. Press Q to exit" , (10,460), 
-                                        cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
+                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
             else:
               cv2.putText(f, "Press R to register" , (10,460), 
-                                        cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
+                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
             cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            cv2.putText(f, name , (x - 10  ,y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
+            cv2.putText(f, name , (x - 10  ,y-5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
             cv2.imshow("web", f)
             ch = cv2.waitKey(1)
             if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID == UID:
-                checkID = rec.Register(f,  newID) #Необходимо генерировать новый ID
+                checkID = rec.register(f,  newID) #Необходимо генерировать новый ID
                 break
             if ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
                 break
@@ -149,23 +150,24 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
        
     
     def EnableBtn(self):
-        if(len(self.lineEdit.text()) > 0 and  len(self.lineEdit_2.text()) > 0 and
-            len(self.lineEdit_3.text()) > 0 and  len(self.lineEdit_4.text()) > 0 ):
-             self.pushButton.setEnabled(True)
+        if(len(self.lineEditFName.text()) > 0 and  len(self.lineEditLName.text()) > 0 and
+            len(self.lineEditMName.text()) > 0 and  len(self.lineEditPhone.text()) > 0 ):
+             self.btnSignUp.setEnabled(True)
         else:
-             self.pushButton.setEnabled(False)
+             self.btnSignUp.setEnabled(False)
         
 class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, ID):
         super().__init__()
         self.setupUi(self) #initial design
         self.setFixedSize(self.size())
-        self.pushButton_1.clicked.connect(self.GetBook)
-        self.pushButton_2.clicked.connect(self.AddBook) 
-        self.pushButton_3.clicked.connect(self.GetInfoReaders) 
-        self.pushButton_4.clicked.connect(self.GetInfoBooks) 
-        self.pushButton_5.clicked.connect(self.GetInfoBB) # get information about borrowed books
-    
+        self.btnBook.clicked.connect(self.GetBook)
+        self.btnAddBook.clicked.connect(self.AddBook) 
+        self.btnInfoReaders.clicked.connect(self.GetInfoReaders) 
+        self.btnInfoBooks.clicked.connect(self.GetInfoBooks) 
+        self.btnInfoBBooks.clicked.connect(self.GetInfoBB) # get information about borrowed books
+        self.ID = ID
+        
     def GetBook(self):
         rec = book_recognizer.Recognizer()
         rec.Create(BRName)
@@ -209,28 +211,28 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         print("AddBook")
     
     def GetInfoReaders(self):
-        self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(5)
+        self.table.setRowCount(0)
+        self.table.setColumnCount(5)
          #disable editing
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Phone", "First name",
+        self.table.setHorizontalHeaderLabels(["ID", "Phone", "First name",
                                                      "Last name", "Middle name"])
         #insert row
-        self.tableWidget.verticalHeader().hide()
+        self.table.verticalHeader().hide()
         
         CSV = CSVDatabase()
         User = CSV.GetAllUsers()
         for i in enumerate(User):
-            rowPosition = self.tableWidget.rowCount()
-            self.tableWidget.insertRow(rowPosition)
-            self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
-            self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
-            self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
-            self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
-            self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+            rowPosition = self.table.rowCount()
+            self.table.insertRow(rowPosition)
+            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
         #fit available space
-        header = self.tableWidget.horizontalHeader()    
+        header = self.table.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
@@ -241,23 +243,23 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         print("GetInfoReaders")
         
     def GetInfoBooks(self):
-        self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(6)
+        self.table.setRowCount(0)
+        self.table.setColumnCount(6)
          #disable editing
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+        self.table.setHorizontalHeaderLabels(["ID", "Author", "Title", 
                                                      "Publisher", "Publication date", "Cover"])
         #insert row
-        self.tableWidget.verticalHeader().hide()
+        self.table.verticalHeader().hide()
         
         CSV = CSVDatabase()
         Book = CSV.GetAllBooks()
         for i in enumerate(Book):
             c = ", " # строка для разделения авторов
-            rowPosition = self.tableWidget.rowCount()
-            self.tableWidget.insertRow(rowPosition)
-            self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
+            rowPosition = self.table.rowCount()
+            self.table.insertRow(rowPosition)
+            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
             authorsStr = "" # строка для размещения в ней ФИО авторов
             for j in enumerate(Book[i[0]].authors):
                 if (j[0] == len(Book[i[0]].authors) - 1):
@@ -265,13 +267,13 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
                 authorsStr += (Book[i[0]].authors[j[0]].first_name + ' ' +
                             Book[i[0]].authors[j[0]].last_name + ' ' +
                             Book[i[0]].authors[j[0]].middle_name + c)
-            self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
-            self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[i[0]].title))
-            self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[i[0]].publisher))
-            self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[i[0]].year))
-            self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(Book[i[0]].file_path))
+            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
+            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[i[0]].title))
+            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[i[0]].publisher))
+            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[i[0]].year))
+            self.table.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(Book[i[0]].file_path))
         #fit available space
-        header = self.tableWidget.horizontalHeader()    
+        header = self.table.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
@@ -281,16 +283,16 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         print("GetInfoBooks")
     
     def GetInfoBB(self):
-        self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(9)
+        self.table.setRowCount(0)
+        self.table.setColumnCount(9)
         #disable editing
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
-        self.tableWidget.setHorizontalHeaderLabels(["User ID", "Book ID", "First name", "Last name",
+        self.table.setHorizontalHeaderLabels(["User ID", "Book ID", "First name", "Last name",
                                                      "Middle name", "Phone", "Title", "Borrow date",
                                                      "Return date"])
         #insert row
-        self.tableWidget.verticalHeader().hide()
+        self.table.verticalHeader().hide()
         
         CSV = CSVDatabase()
         BBook = CSV.GetBorrowedBooks()
@@ -299,19 +301,19 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         DateR = BBook[2]
         User = BBook[3]
         for i in enumerate(DateB):
-            rowPosition = self.tableWidget.rowCount()
-            self.tableWidget.insertRow(rowPosition)
-            self.tableWidget.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
-            self.tableWidget.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
-            self.tableWidget.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
-            self.tableWidget.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
-            self.tableWidget.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
-            self.tableWidget.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(User[i[0]].phone))
-            self.tableWidget.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(Book[i[0]].title))
-            self.tableWidget.setItem(rowPosition, 7, QtWidgets.QTableWidgetItem(DateB[i[0]]))
-            self.tableWidget.setItem(rowPosition, 8, QtWidgets.QTableWidgetItem(DateR[i[0]]))
+            rowPosition = self.table.rowCount()
+            self.table.insertRow(rowPosition)
+            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
+            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+            self.table.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+            self.table.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(Book[i[0]].title))
+            self.table.setItem(rowPosition, 7, QtWidgets.QTableWidgetItem(DateB[i[0]]))
+            self.table.setItem(rowPosition, 8, QtWidgets.QTableWidgetItem(DateR[i[0]]))
         #fit available space
-        header = self.tableWidget.horizontalHeader()    
+        header = self.table.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
@@ -324,26 +326,27 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         print("GetInfoBBooks")
        
 class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, ID):
         super().__init__()
+        self.ID = ID
         self.setupUi(self) #initial design
         self.setFixedSize(self.size())
         self.pushButton.clicked.connect(self.GetBook)
         #tabel 1 with borrowed books
-        self.tableWidget.setColumnCount(6)
+        self.tableBooks.setColumnCount(6)
         #disable editing
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableBooks.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         #Рассмотреть возможность вывода обложки книги в таблицу
-        self.tableWidget.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+        self.tableBooks.setHorizontalHeaderLabels(["ID", "Author", "Title", 
                                                     "Publisher", "Publication date", "Borrow date"])
-        self.tableWidget.resizeColumnsToContents()
+        self.tableBooks.resizeColumnsToContents()
         #tabel 2 with previously taken books
-        self.tableWidget_2.setColumnCount(7)
+        self.tableBooks2.setColumnCount(7)
         #disable editing
-        self.tableWidget_2.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.tableWidget_2.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+        self.tableBooks2.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableBooks2.setHorizontalHeaderLabels(["ID", "Author", "Title", 
                                                     "Publisher", "Publication date", "Borrow date", "Return date"])
-        self.tableWidget_2.resizeColumnsToContents()    
+        self.tableBooks2.resizeColumnsToContents()    
     
     def GetBook(self):
         print("hello")
@@ -353,27 +356,27 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
         super().__init__()
         self.setupUi(self)  # initial design
         self.setFixedSize(self.size())
-        self.pushButton_add.clicked.connect(self.Add)
-        self.pushButton_add.setEnabled(False)
-        self.pushButton.clicked.connect(self.OpenFile)
-        self.lineEdit_title.textChanged.connect(self.EnableBtnAdd)
-        self.lineEdit_author.textChanged.connect(self.EnableBtnAdd)
-        self.lineEdit_publisher.textChanged.connect(self.EnableBtnAdd)
-        self.lineEdit_date.textChanged.connect(self.EnableBtnAdd)
+        self.btnAddBook.clicked.connect(self.Add)
+        self.btnAddBook.setEnabled(False)
+        self.btnSelectFile.clicked.connect(self.OpenFile)
+        self.lineEditTitle.textChanged.connect(self.EnableBtnAdd)
+        self.lineEditAuthor.textChanged.connect(self.EnableBtnAdd)
+        self.lineEditPublisher.textChanged.connect(self.EnableBtnAdd)
+        self.lineEditDate.textChanged.connect(self.EnableBtnAdd)
    
     """сделать запись в БД"""
     def Add(self):
-        title = self.lineEdit_title.text()
-        author = self.lineEdit_author.text()
-        publisher = self.lineEdit_publisher.text()
-        date = self.lineEdit_date.text()
-        datenow = str(datetime.now())
-        datenow = datenow.replace(" ", "")
-        datenow = datenow.replace(":", "")
-        datenow = datenow.replace(".", "")
-        coverName = datenow
+        title = self.lineEditTitle.text()
+        author = self.lineEditAuthor.text()
+        publisher = self.lineEditPublisher.text()
+        date = self.lineEditDate.text()
+        dateNow = str(datetime.now())
+        dateNow = dateNow.replace(" ", "")
+        dateNow = dateNow.replace(":", "")
+        dateNow = dateNow.replace(".", "")
+        coverName = dateNow
         self.Cover.save("infrastructure/Database/Books/Covers/" + coverName + ".png")
-        print(title, " ", author, " ", publisher, " ", date, " ",datenow)
+        print(title, " ", author, " ", publisher, " ", date, " ",dateNow)
         print("add")
         self.close()
         
@@ -381,7 +384,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
        В функции добавления новой обложки необходимо реализовать именование обложек
         в соответствии с БД, проверять имя на уникальность и т.д"""
     def OpenFile(self):
-        fileName = QFileDialog.getOpenFileName(self.label_pix, 
+        fileName = QFileDialog.getOpenFileName(self.labelPicture, 
                                                      'Open File',"",
                                                      "Images (*.png *.jpg *.jpeg *.bmp *.gif)")
         """Pixmap - показываем миниатюру картинки на экране загрузки 
@@ -389,19 +392,21 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
         if(fileName[0] != ""):
             pixmap = QPixmap(fileName[0])
             self.Cover = pixmap 
-            pixmap = pixmap.scaled(self.label_pix.width(), self.label_pix.height(), QtCore.Qt.KeepAspectRatio)
-            self.label_pix.setPixmap(pixmap)
+            pixmap = pixmap.scaled(self.labelPicture.width(),
+                                   self.labelPicture.height(), 
+                                   QtCore.Qt.KeepAspectRatio)
+            self.labelPicture.setPixmap(pixmap)
             self.EnableBtnAdd()
-            print(self.label_pix.pixmap())
+            print(self.labelPicture.pixmap())
             print("open")
         
     def EnableBtnAdd(self):
-        if(len(self.lineEdit_title.text()) > 0 and  len(self.lineEdit_author.text()) > 0 and
-            len(self.lineEdit_publisher.text()) > 0 and  len(self.lineEdit_date.text()) > 0 
-            and self.label_pix.pixmap()):
-             self.pushButton_add.setEnabled(True)
+        if(len(self.lineEditTitle.text()) > 0 and  len(self.lineEditAuthor.text()) > 0 and
+            len(self.lineEditPublisher.text()) > 0 and  len(self.lineEditDate.text()) > 0 
+            and self.labelPicture.pixmap()):
+             self.btnAddBook.setEnabled(True)
         else:
-             self.pushButton_add.setEnabled(False)   
+             self.btnAddBook.setEnabled(False)   
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
     window = LoginWindow()  

@@ -20,7 +20,7 @@
    <string>Reader</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelHello">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -38,7 +38,7 @@
      <string>Welcome,</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="btnBook">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -57,7 +57,7 @@
      <string>Get or return a book</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="tableBooks">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -67,7 +67,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tableWidget_2">
+   <widget class="QTableWidget" name="tableBooks2">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -77,7 +77,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="labelInfo2">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -95,7 +95,7 @@
      <string>Books you had taken before</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="labelInfo1">
     <property name="geometry">
      <rect>
       <x>30</x>

@@ -20,7 +20,7 @@
    <string>Smart Library Login</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="btnSignUp">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -33,7 +33,7 @@
      <string>Sign up</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="btnSignIn">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -51,7 +51,7 @@
      <string>Sign in</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelHeader">
     <property name="geometry">
      <rect>
       <x>50</x>
@@ -70,7 +70,7 @@
      <string>Sign in to Smart Library</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="labelInfo">
     <property name="geometry">
      <rect>
       <x>50</x>

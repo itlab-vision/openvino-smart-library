@@ -20,7 +20,7 @@
    <string>Adding Book</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelHeader">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -38,7 +38,7 @@
      <string>Add a new book</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_add">
+   <widget class="QPushButton" name="btnAddBook">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -51,7 +51,7 @@
      <string>Add</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="btnSelectFile">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -64,7 +64,7 @@
      <string>Select file</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_pix">
+   <widget class="QLabel" name="labelPicture">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -77,7 +77,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -88,52 +88,52 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLineEdit" name="lineEdit_title"/>
+      <widget class="QLineEdit" name="lineEditTitle"/>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_author"/>
+      <widget class="QLineEdit" name="lineEditAuthor"/>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_publisher"/>
+      <widget class="QLineEdit" name="lineEditPublisher"/>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_date"/>
+      <widget class="QLineEdit" name="lineEditDate"/>
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>30</x>
       <y>80</y>
-      <width>121</width>
+      <width>125</width>
       <height>201</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelTitle">
        <property name="text">
         <string>Title :</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="labelAuthor">
        <property name="text">
         <string>Author :</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="labelPublisher">
        <property name="text">
         <string>Publisher :</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="labelDate">
        <property name="text">
         <string>Publication date :</string>
        </property>

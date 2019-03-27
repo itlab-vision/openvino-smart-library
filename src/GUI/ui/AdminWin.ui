@@ -14,7 +14,7 @@
    <string>Administrator</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="table">
     <property name="geometry">
      <rect>
       <x>310</x>
@@ -24,7 +24,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="btnInfoReaders">
     <property name="geometry">
      <rect>
       <x>550</x>
@@ -37,7 +37,7 @@
      <string>Readers</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="btnInfoBooks">
     <property name="geometry">
      <rect>
       <x>790</x>
@@ -50,7 +50,7 @@
      <string>Books</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="btnInfoBBooks">
     <property name="geometry">
      <rect>
       <x>1030</x>
@@ -63,7 +63,7 @@
      <string>Borrowed books</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelInfo">
     <property name="geometry">
      <rect>
       <x>310</x>
@@ -81,7 +81,7 @@
      <string>Get information about:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_1">
+   <widget class="QLabel" name="labelHello">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -99,7 +99,7 @@
      <string>Welcome, </string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="btnAddBook">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -112,7 +112,7 @@
      <string>Add a new book</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_1">
+   <widget class="QPushButton" name="btnBook">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -125,14 +125,14 @@
      <string>Get or return a book</string>
     </property>
    </widget>
-   <zorder>tableWidget</zorder>
-   <zorder>label</zorder>
-   <zorder>label_1</zorder>
-   <zorder>pushButton_2</zorder>
-   <zorder>pushButton_1</zorder>
-   <zorder>pushButton_3</zorder>
-   <zorder>pushButton_5</zorder>
-   <zorder>pushButton_4</zorder>
+   <zorder>table</zorder>
+   <zorder>labelInfo</zorder>
+   <zorder>labelHello</zorder>
+   <zorder>btnAddBook</zorder>
+   <zorder>btnBook</zorder>
+   <zorder>btnInfoReaders</zorder>
+   <zorder>btnInfoBBooks</zorder>
+   <zorder>btnInfoBooks</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

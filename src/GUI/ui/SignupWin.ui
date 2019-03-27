@@ -23,7 +23,7 @@
    <locale language="Russian" country="Russia"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QLineEdit" name="lineEditFName">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -33,7 +33,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelFName">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -46,7 +46,7 @@
      <string>First name</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="labelLName">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -59,7 +59,7 @@
      <string>Last name</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="labelMName">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -72,7 +72,7 @@
      <string>Middle name</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
+   <widget class="QLineEdit" name="lineEditLName">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -82,7 +82,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_3">
+   <widget class="QLineEdit" name="lineEditMName">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -92,7 +92,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="labelPhone">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -105,7 +105,7 @@
      <string>Phone</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_4">
+   <widget class="QLineEdit" name="lineEditPhone">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -115,7 +115,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="btnSignUp">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -128,7 +128,7 @@
      <string>Sign up for Smart Library</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="labelHeader">
     <property name="geometry">
      <rect>
       <x>110</x>
