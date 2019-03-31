@@ -36,18 +36,30 @@ usersTable = "infrastructure/Database/Users/Users.csv"
 
 #Поток для отрисовки видео с вебкамеры
 class Thread(QThread):
+    
     changePixmap = pyqtSignal(QPixmap)
     returnID = pyqtSignal(int)
     returnUID = pyqtSignal(int)
     
-    def run(self): # Как передать агументы? Возвратить?
+    def __init__(self, recName):
+       QThread.__init__(self)
+       self.check = False
+       self.name = recName
+    
+    def run(self):
+       if (self.name == "face"):
+         self.faceRecognition()
+       if (self.name == "book"):
+         self.bookRecognition()
+       
+    def faceRecognition(self):
         rec = face_recognizer.FaceRecognizer.create(FRName)
         rec.init(dllPath) # передавать через параметры
         rec.XMLPath(dbPath)
         cap = cv2.VideoCapture(0)
         UID = rec.getUID()
         self.returnUID.emit(UID)
-        self.check = False
+
         name = "UNKNOWN"
         CSV = CSVDatabase()
         while True:
@@ -74,15 +86,61 @@ class Thread(QThread):
             resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
             self.changePixmap.emit(resizeImage)
             self.returnID.emit(ID)
+            print("IMWORKING")
             
+    def bookRecognition(self):
+        rec = book_recognizer.Recognizer()
+        rec.Create(BRName)
+#        #---Функция БД, присваивающая templ список с изображениями обложек-----------
+        templ = [ os.path.join("infrastructure/Database/Books/Covers/", b) 
+                for b in os.listdir("infrastructure/Database/Books/Covers/")
+                 if os.path.isfile(os.path.join("infrastructure/Database/Books/Covers/", b)) ]
+        #-----------------------------------------------------------------------------
+        cap = cv2.VideoCapture(0)
+        i = 0
+        l = len(templ)
+        res_arr = []
+        _, frame = cap.read()
+        ym, xm, _ = frame.shape
+        for i in range(l):
+            res_arr.append(0)
+        while(True): 
+            _, frame = cap.read()
+            crop_frame = frame[ym//2 - 170 : ym//2 + 170, xm//2 - 120 : xm//2 + 120]
+            if (self.check == True):
+               cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150),
+                          (xm//2 + 110, ym//2 + 149),
+                           (0, 255, 255))
+               recognize_result = rec.Recognize(crop_frame, templ, 0.7)
+               print(res_arr, "\n")
+               for i in range(l):
+                 res_arr[i] = res_arr[i] + recognize_result[i]
+               if max(res_arr) > 200:
+                   ID = res_arr.index(max(res_arr))
+                   self.returnID.emit(ID)
+                   res_arr.clear()
+                   for i in range(l):
+                      res_arr.append(0)
+                   self.check = False;            
+            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
+                                         QImage.Format_RGB888)
+            pixmap = QPixmap.fromImage(convertToQtFormat)
+            resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
+            self.changePixmap.emit(resizeImage)       
+        
 #получить newID из основного потока
     def passNewID(self, newID):
         self.newID = newID
         self.check = True #флаг того, что newID получен и можно регистрировать
+    
+    def recognizeBook(self):
+        self.check = True #флаг того, что нужно распознать книгу
         
 #функция для остановки потока 
     def stop(self):
         self.terminate()
+
 #Окно входа в приложение
 class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
      def __init__(self):
@@ -94,7 +152,7 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         
 #Начинаем отрисовку видео с веб камеры в новом потоке        
         self.image = QPixmap()
-        self.thread = Thread(self)
+        self.thread = Thread("face")
         self.thread.changePixmap.connect(self.setPixmap) 
         self.thread.returnID.connect(self.getID)
         self.thread.returnUID.connect(self.getUID)
@@ -112,7 +170,8 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         self.lineEditLName.textChanged.connect(self.enableBtnSignUp2)
         self.lineEditMName.textChanged.connect(self.enableBtnSignUp2)
         self.lineEditPhone.textChanged.connect(self.enableBtnSignUp2)
-    
+        
+#зачем нужен paint event?
      def paintEvent(self, event):
         self.labelCamera.setPixmap(self.image)
 
@@ -234,51 +293,51 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
 class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     def __init__(self, ID):
         super().__init__()
+        self.ID = ID
         self.setupUi(self) #initial design
-        self.setFixedSize(self.size())
+        self.setFixedSize(self.size())  
+        self.labelInfo2.hide()
+        
+        self.image = QPixmap()
+        self.thread = Thread("book")
+        self.thread.changePixmap.connect(self.setPixmap) 
+        self.thread.returnID.connect(self.getBookID)
+        self.thread.start()
+        
+        self.comboBox.currentIndexChanged.connect(self.comboBoxChanged, 
+                                                 self.comboBox.currentIndex()) 
+        self.CSV = CSVDatabase()
+        self.labelHello.setText(self.labelHello.text()+ self.CSV.GetUser(ID)[0].first_name)
+        self.GetInfoBooks()
         self.btnBook.clicked.connect(self.GetBook)
         self.btnAddBook.clicked.connect(self.AddBook) 
-        self.btnInfoReaders.clicked.connect(self.GetInfoReaders) 
-        self.btnInfoBooks.clicked.connect(self.GetInfoBooks) 
-        self.btnInfoBBooks.clicked.connect(self.GetInfoBB) # get information about borrowed books
-        self.ID = ID
+        
+        
+    def comboBoxChanged(self):
+        if(self.comboBox.currentIndex() == 0):
+            self.GetInfoBooks()
+        if(self.comboBox.currentIndex() == 1):
+            self.GetInfoReaders()
+        if(self.comboBox.currentIndex() == 2):
+            self.GetInfoBB()
         
     def GetBook(self):
-        rec = book_recognizer.Recognizer()
-        rec.Create(BRName)
-#        #---Функция БД, присваивающая templ список с изображениями обложек-----------
-        templ = [ os.path.join("infrastructure/Database/Books/Covers/", b) 
-                for b in os.listdir("infrastructure/Database/Books/Covers/")
-                 if os.path.isfile(os.path.join("infrastructure/Database/Books/Covers/", b)) ]
-        #-----------------------------------------------------------------------------
-        cap = cv2.VideoCapture(0)
-        i = 0
-        l = len(templ)
-        res_arr = []
-        _, frame = cap.read()
-        ym, xm, _ = frame.shape
-        for i in range(l):
-            res_arr.append(0)
+        self.thread.recognizeBook()
+        self.labelInfo2.show()
         
+    @pyqtSlot(QPixmap)
+    def setPixmap(self, image):
+        if image.isNull():
+            print("Viewer Dropped frame!")
+        self.image = image
+        self.labelCamera.setPixmap(self.image)
+        self.update()  
         
-        while(True): 
-            _, frame = cap.read()
-            crop_frame = frame[ym//2 - 170 : ym//2 + 170, xm//2 - 120 : xm//2 + 120]
-            cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), (xm//2 + 110, ym//2 + 150), (0, 255, 255))
-            cv2.imshow("web", frame)
-            cv2.waitKey(1)   
-            recognize_result = rec.Recognize(crop_frame, templ, 0.7)
-            print(res_arr, "\n")
-            for i in range(l):
-                res_arr[i] = res_arr[i] + recognize_result[i]
-            if max(res_arr) > 1000:
-                break
-        print(res_arr, "\n")
-        cap.release()
-        cv2.destroyAllWindows()
-        idres = res_arr.index(max(res_arr))
-        print("Book id = ", idres)
-
+    @pyqtSlot(int)   
+    def getBookID(self, ID):
+         self.bookID = ID
+         self.labelInfo2.hide()
+         print(self.bookID)
         
     def AddBook(self):
         self.bookWin = BookWindow()
@@ -296,10 +355,12 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         #insert row
         self.table.verticalHeader().hide()
         
-        CSV = CSVDatabase()
-        User = CSV.GetAllUsers()
+#        CSV = CSVDatabase()
+        User = self.CSV.GetAllUsers()
+        print(User[0].user_id)
         for i in enumerate(User):
             rowPosition = self.table.rowCount()
+            print(rowPosition)
             self.table.insertRow(rowPosition)
             self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
             self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
@@ -328,8 +389,8 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         #insert row
         self.table.verticalHeader().hide()
         
-        CSV = CSVDatabase()
-        Book = CSV.GetAllBooks()
+#        CSV = CSVDatabase()
+        Book = self.CSV.GetAllBooks()
         for i in enumerate(Book):
             c = ", " # строка для разделения авторов
             rowPosition = self.table.rowCount()
@@ -369,8 +430,8 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         #insert row
         self.table.verticalHeader().hide()
         
-        CSV = CSVDatabase()
-        BBook = CSV.GetBorrowedBooks()
+#        CSV = CSVDatabase()
+        BBook = self.CSV.GetBorrowedBooks()
         Book = BBook[0]
         DateB = BBook[1]
         DateR = BBook[2]
@@ -399,7 +460,14 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         header.setSectionResizeMode(7, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(8, QtWidgets.QHeaderView.Stretch)
         print("GetInfoBBooks")
-       
+        
+    def closeEvent(self, event):
+            cap = cv2.VideoCapture(0)
+            cap.release()
+            self.thread.stop()
+            print("thread stopped")
+            event.accept()      
+    
 class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
     def __init__(self, ID):
         super().__init__()

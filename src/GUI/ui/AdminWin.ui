@@ -17,57 +17,18 @@
    <widget class="QTableWidget" name="table">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>20</y>
-      <width>941</width>
-      <height>571</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnInfoReaders">
-    <property name="geometry">
-     <rect>
       <x>550</x>
-      <y>620</y>
-      <width>221</width>
-      <height>61</height>
+      <y>90</y>
+      <width>711</width>
+      <height>561</height>
      </rect>
-    </property>
-    <property name="text">
-     <string>Readers</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnInfoBooks">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>620</y>
-      <width>221</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Books</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnInfoBBooks">
-    <property name="geometry">
-     <rect>
-      <x>1030</x>
-      <y>620</y>
-      <width>221</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Borrowed books</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelInfo">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>620</y>
+      <x>560</x>
+      <y>20</y>
       <width>221</width>
       <height>51</height>
      </rect>
@@ -78,16 +39,16 @@
      </font>
     </property>
     <property name="text">
-     <string>Get information about:</string>
+     <string>Get information about</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelHello">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>10</y>
-      <width>271</width>
-      <height>121</height>
+      <x>20</x>
+      <y>20</y>
+      <width>231</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -102,8 +63,8 @@
    <widget class="QPushButton" name="btnAddBook">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>280</y>
+      <x>260</x>
+      <y>580</y>
       <width>221</width>
       <height>61</height>
      </rect>
@@ -115,8 +76,8 @@
    <widget class="QPushButton" name="btnBook">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>190</y>
+      <x>20</x>
+      <y>580</y>
       <width>221</width>
       <height>61</height>
      </rect>
@@ -125,14 +86,81 @@
      <string>Get or return a book</string>
     </property>
    </widget>
-   <zorder>table</zorder>
-   <zorder>labelInfo</zorder>
-   <zorder>labelHello</zorder>
-   <zorder>btnAddBook</zorder>
-   <zorder>btnBook</zorder>
-   <zorder>btnInfoReaders</zorder>
-   <zorder>btnInfoBBooks</zorder>
-   <zorder>btnInfoBooks</zorder>
+   <widget class="QLabel" name="labelCamera">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>472</width>
+      <height>354</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignHCenter|Qt::AlignTop</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>30</y>
+      <width>211</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <item>
+     <property name="text">
+      <string>books</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>readers</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>borrowed books</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="labelInfo2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>470</y>
+      <width>481</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Place the book in the selcted area</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
