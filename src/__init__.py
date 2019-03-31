@@ -245,7 +245,7 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         
     def GetBook(self):
         rec = book_recognizer.Recognizer()
-        rec.create("ORB")
+        rec.create(BRName)
         #---Функция БД, присваивающая templ список с изображениями обложек-----------
         templ = [ os.path.join("../infrastructure/Database/Books/Covers/", b) 
                 for b in os.listdir("../infrastructure/Database/Books/Covers/")
