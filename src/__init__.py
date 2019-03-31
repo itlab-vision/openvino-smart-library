@@ -34,7 +34,7 @@ BRName = "ORB"
 #Data base files
 usersTable = "infrastructure/Database/Users/Users.csv"
 
-
+#Поток для отрисовки видео с вебкамеры
 class Thread(QThread):
     changePixmap = pyqtSignal(QPixmap)
     returnID = pyqtSignal(int)
@@ -74,22 +74,25 @@ class Thread(QThread):
             resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
             self.changePixmap.emit(resizeImage)
             self.returnID.emit(ID)
-    
-    def stop(self):
-        self.terminate()
-    
+            
+#получить newID из основного потока
     def register(self, newID):
         self.newID = newID
-        self.check = True
-            
+        self.check = True #флаг того, что newID получен и можно регистрировать
+        
+#функция для остановки потока 
+    def stop(self):
+        self.terminate()
+#Окно входа в приложение
 class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
      def __init__(self):
         super().__init__()
         self.setupUi(self)  # initial design
         self.setFixedSize(self.size())
-        
+#        
         self.check = True
-        #get video from webcam
+        
+#Начинаем отрисовку видео с веб камеры в новом потоке        
         self.image = QPixmap()
         self.thread = Thread(self)
         self.thread.changePixmap.connect(self.setPixmap) 
@@ -105,7 +108,6 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         self.btnBack.clicked.connect(self.showSignIn)
         self.btnSignUp2.clicked.connect(self.signUp)
         self.btnSignIn.clicked.connect(self.signIn) 
-#        self.btnSignIn.setEnabled(False)
         self.lineEditFName.textChanged.connect(self.enableBtnSignUp2)
         self.lineEditLName.textChanged.connect(self.enableBtnSignUp2)
         self.lineEditMName.textChanged.connect(self.enableBtnSignUp2)
@@ -120,23 +122,27 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
             print("Viewer Dropped frame!")
         self.image = image
         self.update()
-        
+
+#Функция, принимающия распознанный ID из потока
      @pyqtSlot(int)   
      def getID(self, ID):
         currID = ID
+        """Нам достаточно распознать человека один раз, поэтому 
+           здесь эта проверка"""
         if (currID != self.UID and self.check == True):
             self.ID = currID
             self.check = False
             self.enableBtnSignIn()
         self.enableBtnSignUp2()
             
-    
+#Функция, принимающия ID неизвестного пользователя из потока  
      @pyqtSlot(int)   
      def getUID(self, UID):
         self.UID = UID
         self.ID = UID
         print("UID =" , self.UID)
-        
+
+#Событие закрытия текущего окна        
      def closeEvent(self, event):
             cap = cv2.VideoCapture(0)
             cap.release()
@@ -181,9 +187,25 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
          self.btnSignUp.show()
          self.labelInfo.show()
          self.btnSignIn.show()
-         
+                         
+     def enableBtnSignIn(self): 
+         if(self.ID != self.UID):
+             self.btnSignIn.setEnabled(True)
+         else:
+             self.btnSignIn.setEnabled(False)  
+    
+     def enableBtnSignUp2(self):
+        if(len(self.lineEditFName.text()) > 0 and  
+           len(self.lineEditLName.text()) > 0 and
+            len(self.lineEditMName.text()) > 0 and  
+            len(self.lineEditPhone.text()) > 0 and
+            self.ID == self.UID):
+             self.btnSignUp2.setEnabled(True)
+        else:
+             self.btnSignUp2.setEnabled(False)  
+        
      def signIn(self):
-#        if (self.ID != self.UID):
+        if (self.ID != self.UID):
             CSV = CSVDatabase()
             role = (CSV.GetUser(self.ID))[1]
             self.close()
@@ -192,28 +214,8 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
                 self.readerWin.show()
             else:
                 self.adminWin = AdminWindow(self.ID)
-                self.adminWin.show()
-#                
-     def enableBtnSignIn(self): 
-         if(self.ID != self.UID):
-             self.btnSignIn.setEnabled(True)
-         else:
-             self.btnSignIn.setEnabled(False)  
-    
-#     def enableBtnSignUp(self): 
-#         if(self.ID == self.UID):
-#             self.btnSignUp.setEnabled(True)
-#         else:
-#             self.btnSignUp.setEnabled(False)  
-             
-     def enableBtnSignUp2(self):
-        if(len(self.lineEditFName.text()) > 0 and  len(self.lineEditLName.text()) > 0 and
-            len(self.lineEditMName.text()) > 0 and  len(self.lineEditPhone.text()) > 0 
-             and self.ID == self.UID):
-             self.btnSignUp2.setEnabled(True)
-        else:
-             self.btnSignUp2.setEnabled(False)  
-             
+                self.adminWin.show()           
+
      def signUp(self):
         CSV = CSVDatabase()
         fName = self.lineEditFName.text() # first name 
@@ -222,8 +224,6 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         phone = self.lineEditPhone.text() 
         #insert user in DB
         newID = NumOfLines(usersTable)
-        print("new ID = ", newID)
-        print("User:")
         user = User(newID, phone, fName, lName, mName)
         user._print()
         print("Result:")
@@ -476,12 +476,15 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
             print("open")
         
     def EnableBtnAdd(self):
-        if(len(self.lineEditTitle.text()) > 0 and  len(self.lineEditAuthor.text()) > 0 and
-            len(self.lineEditPublisher.text()) > 0 and  len(self.lineEditDate.text()) > 0 
-            and self.labelPicture.pixmap()):
+        if(len(self.lineEditTitle.text()) > 0 and
+           len(self.lineEditAuthor.text()) > 0 and
+           len(self.lineEditPublisher.text()) > 0 and
+           len(self.lineEditDate.text()) > 0 and 
+           self.labelPicture.pixmap()):
              self.btnAddBook.setEnabled(True)
         else:
              self.btnAddBook.setEnabled(False)   
+
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
     window = StartWindow()  
