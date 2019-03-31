@@ -3,7 +3,9 @@ import numpy as np
 import cv2
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QImage
+from PyQt5.QtCore import (Qt, QCoreApplication, QThread, QPoint, pyqtSignal, pyqtSlot)
+
 from datetime import datetime, date, time
 sys.path.insert(0, 'GUI')
 import LoginWin  #design
@@ -11,6 +13,7 @@ import SignupWin #design
 import AdminWin  #design
 import ReaderWin #design
 import BookWin #design
+import StartWin #design
 sys.path.insert(0, 'modules')
 import face_recognizer
 import book_recognizer
@@ -31,6 +34,175 @@ BRName = "ORB"
 #Data base files
 usersTable = "infrastructure/Database/Users/Users.csv"
 
+
+class Thread(QThread):
+    changePixmap = pyqtSignal(QPixmap)
+    returnID = pyqtSignal(int)
+    returnUID = pyqtSignal(int)
+    def run(self): # Как передать агументы? Возвратить?
+        rec = face_recognizer.FaceRecognizer.create(FRName)
+        rec.init(dllPath) # передавать через параметры
+        rec.XMLPath(dbPath)
+        cap = cv2.VideoCapture(0)
+        UID = rec.getUID()
+        self.returnUID.emit(UID)
+        name = "UNKNOWN"
+        while True:
+            ret, f = cap.read()
+            (ID, (x, y, w, h)) = rec.recognize(f)
+            if (ID != UID):
+              name = str(ID) #Можно выводить имя пользователя
+              cv2.putText(f, "You are already a member. Press Q to exit" , (10,460), 
+                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
+            else:
+              name = "UNKNOWN"
+              cv2.putText(f, "Press R to register" , (10,460), 
+                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
+            cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            cv2.putText(f, name , (x - 10  ,y-5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
+            rgbImage = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
+            convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
+                                         QImage.Format_RGB888)
+            pixmap = QPixmap.fromImage(convertToQtFormat)
+            resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
+            self.changePixmap.emit(resizeImage)
+            self.returnID.emit(ID)
+            
+class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
+     def __init__(self):
+        super().__init__()
+        self.setupUi(self)  # initial design
+        self.setFixedSize(self.size())
+        self.check = True
+        #get video from webcam
+        self.image = QPixmap()
+        thread = Thread(self)
+        thread.changePixmap.connect(self.setPixmap) 
+        thread.returnID.connect(self.getID)
+        thread.returnUID.connect(self.getUID)
+        thread.start()
+        
+        self.btnBack.setIcon(QIcon("GUI/ui/backArrow.png"))
+        #hide from view sign up elements
+        self.showSignIn()
+        #assign func on btns
+        self.btnSignUp.clicked.connect(self.showSignUp)
+        self.btnBack.clicked.connect(self.showSignIn)
+        self.btnSignUp2.clicked.connect(self.signUp)
+        self.btnSignIn.clicked.connect(self.signIn) 
+#        self.btnSignIn.setEnabled(False)
+        self.lineEditFName.textChanged.connect(self.enableBtnSignUp2)
+        self.lineEditLName.textChanged.connect(self.enableBtnSignUp2)
+        self.lineEditMName.textChanged.connect(self.enableBtnSignUp2)
+        self.lineEditPhone.textChanged.connect(self.enableBtnSignUp2)
+    
+     def paintEvent(self, event):
+        self.labelCamera.setPixmap(self.image)
+
+     @pyqtSlot(QPixmap)
+     def setPixmap(self, image):
+        if image.isNull():
+            print("Viewer Dropped frame!")
+        self.image = image
+        self.update()
+        
+     @pyqtSlot(int)   
+     def getID(self, ID):
+        self.currID = ID
+        if (self.currID != self.UID and self.check == True):
+            self.ID = self.currID
+            self.check = False
+            self.enableBtnSignIn()
+        self.enableBtnSignUp2()
+        print(self.ID)
+    
+     @pyqtSlot(int)   
+     def getUID(self, UID):
+        self.UID = UID
+        print("UID =" , self.UID)
+        
+     def closeEvent(self, event):
+         cap = cv2.VideoCapture(0)
+         cap.release
+         self.thread.stop()
+         event.accept()
+         
+     def showSignUp(self):
+         #hide signin elemnts
+         self.labelHeader.hide()
+         self.btnSignUp.hide()
+         self.labelInfo.hide()
+         self.btnSignIn.hide()
+         #show signup elements
+         self.labelHeader2.show()
+         self.btnBack.show()
+         self.labelFName.show()
+         self.labelLName.show()
+         self.labelMName.show()
+         self.labelPhone.show()
+         self.lineEditFName.show()
+         self.lineEditLName.show()
+         self.lineEditMName.show()
+         self.lineEditPhone.show()
+         self.btnSignUp2.show()  
+         
+     def showSignIn(self):
+         #hide from view sign up elements
+         self.labelHeader2.hide()
+         self.btnBack.hide()
+         self.labelFName.hide()
+         self.labelLName.hide()
+         self.labelMName.hide()
+         self.labelPhone.hide()
+         self.lineEditFName.hide()
+         self.lineEditLName.hide()
+         self.lineEditMName.hide()
+         self.lineEditPhone.hide()
+         self.btnSignUp2.hide()
+         #show sign in elements
+         self.labelHeader.show()
+         self.btnSignUp.show()
+         self.labelInfo.show()
+         self.btnSignIn.show()
+         
+     def signIn(self):
+        if (self.ID != self.UID):
+            CSV = CSVDatabase()
+            role = (CSV.GetUser(self.ID))[1]
+            self.close()
+            if (int(role.role_id) == 1):
+                self.readerWin = ReaderWindow(self.ID)
+                self.readerWin.show()
+            else:
+                self.adminWin = AdminWindow(self.ID)
+                self.adminWin.show()
+#                
+     def enableBtnSignIn(self): 
+         if(self.ID != self.UID):
+             self.btnSignIn.setEnabled(True)
+         else:
+             self.btnSignIn.setEnabled(False)  
+    
+#     def enableBtnSignUp(self): 
+#         if(self.ID == self.UID):
+#             self.btnSignUp.setEnabled(True)
+#         else:
+#             self.btnSignUp.setEnabled(False)  
+             
+     def enableBtnSignUp2(self):
+        if(len(self.lineEditFName.text()) > 0 and  len(self.lineEditLName.text()) > 0 and
+            len(self.lineEditMName.text()) > 0 and  len(self.lineEditPhone.text()) > 0 
+             and self.ID == self.UID):
+             self.btnSignUp2.setEnabled(True)
+        else:
+             self.btnSignUp2.setEnabled(False)  
+             
+     def signUp(self):
+        """"""
+         
+         
+        
 class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
     
     def __init__(self):
@@ -40,6 +212,8 @@ class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
         self.btnSignUp.clicked.connect(self.SignUp)
         self.btnSignIn.clicked.connect(self.SignIn)  # execute func on button click
         self.signupWin = SignupWindow()
+        
+        
     """Пофиксить работу БД при входе"""    
     def SignIn(self):
         rec = face_recognizer.FaceRecognizer.create(FRName)
@@ -97,6 +271,22 @@ class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
         self.lineEditLName.textChanged.connect(self.EnableBtn)
         self.lineEditMName.textChanged.connect(self.EnableBtn)
         self.lineEditPhone.textChanged.connect(self.EnableBtn)
+        
+        self.image = QPixmap()
+        thread = Thread(self)
+        thread.changePixmap.connect(self.setPixmap)  
+        thread.start()
+    
+    def paintEvent(self, event):
+        self.labelCamera.setPixmap(self.image)
+
+    @pyqtSlot(QPixmap)
+    def setPixmap(self, image):
+        if image.isNull():
+            print("Viewer Dropped frame!")
+        self.image = image
+        self.update()
+        
         
     """Проверить реализацию записи пользователя в БД"""
     def SignUp(self):
@@ -409,7 +599,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
              self.btnAddBook.setEnabled(False)   
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
-    window = LoginWindow()  
+    window = StartWindow()  
     window.show() 
     app.exec_()  
 

@@ -53,6 +53,6 @@ class PVLRecognizer(FaceRecognizer):
                             img.ctypes.data_as(C.POINTER(C.c_ubyte)), 
                             xptr, yptr, wptr, hptr)
          return (ID, (x.value, y.value, w.value, h.value)) 
-    
+     
     def getUID(self):
         return self.PVL.UnknownID()
