@@ -8,12 +8,12 @@ from PyQt5.QtCore import (Qt, QCoreApplication, QThread, QPoint, pyqtSignal, pyq
 
 from datetime import datetime, date, time
 sys.path.insert(0, 'GUI')
-import LoginWin  #design
-import SignupWin #design
+
+import StartWin #design
 import AdminWin  #design
 import ReaderWin #design
 import BookWin #design
-import StartWin #design
+
 sys.path.insert(0, 'modules')
 import face_recognizer
 import book_recognizer
@@ -207,7 +207,6 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
 #             self.btnSignUp.setEnabled(False)  
              
      def enableBtnSignUp2(self):
-        print(self.ID)
         if(len(self.lineEditFName.text()) > 0 and  len(self.lineEditLName.text()) > 0 and
             len(self.lineEditMName.text()) > 0 and  len(self.lineEditPhone.text()) > 0 
              and self.ID == self.UID):
@@ -231,152 +230,7 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         print(CSV.AddUser(user))
         self.thread.register(newID)
         
-         
-         
-        
-#class LoginWindow(QtWidgets.QMainWindow, LoginWin.Ui_MainWindow):
-#    
-#    def __init__(self):
-#        super().__init__()
-#        self.setupUi(self)  # initial design
-#        self.setFixedSize(self.size())
-#        self.btnSignUp.clicked.connect(self.SignUp)
-#        self.btnSignIn.clicked.connect(self.SignIn)  # execute func on button click
-#        self.signupWin = SignupWindow()
-#        
-#        
-#    """Пофиксить работу БД при входе"""    
-#    def SignIn(self):
-#        rec = face_recognizer.FaceRecognizer.create(FRName)
-#        rec.init(dllPath) # передавать через параметры
-#        rec.XMLPath(dbPath)
-#        cap = cv2.VideoCapture(0)
-#        UID = rec.getUID()
-#        name = "UNKNOWN"
-#        ch = 0
-#        CSV = CSVDatabase()
-#        while(True): 
-#            _, f = cap.read()
-#            (ID, (x, y, w, h)) = rec.recognize(f)
-#            print(ID)
-#            if (ID != UID):
-#              name = (CSV.GetUser(ID))[0].first_name
-#              print(name)
-#            else:
-#               cv2.putText(f, "You are not a member." , (135, 460),
-#                                cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 1)  
-#            cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
-#            cv2.putText(f, name , (x,y-2), 
-#                          cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
-#            cv2.imshow("web", f)
-#            if ID != UID or ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
-#                break
-#            ch = cv2.waitKey(1) 
-#        h = cv2.waitKey(1000)
-#        cap.release()
-#        cv2.destroyAllWindows()
-#        if (ID != UID):
-#            CSV = CSVDatabase()
-#            role = (CSV.GetUser(ID))[1]
-#            self.close()
-#            if (int(role.role_id) == 1):
-#                self.readerWin = ReaderWindow(ID)
-#                self.readerWin.show()
-#            else:
-#                self.adminWin = AdminWindow(ID)
-#                self.adminWin.show()
-#        
-#    def SignUp(self):
-#        self.close()
-#        self.signupWin.show()
-
-#class SignupWindow(QtWidgets.QMainWindow, SignupWin.Ui_MainWindow):
-#    def __init__(self):
-#        super().__init__()
-#        self.setupUi(self)  # initial design
-#        self.setFixedSize(self.size())   
-#        self.btnSignUp.clicked.connect(self.SignUp)
-#        self.btnSignUp.setEnabled(False)
-#        
-#        self.lineEditFName.textChanged.connect(self.EnableBtn)
-#        self.lineEditLName.textChanged.connect(self.EnableBtn)
-#        self.lineEditMName.textChanged.connect(self.EnableBtn)
-#        self.lineEditPhone.textChanged.connect(self.EnableBtn)
-#        
-#        self.image = QPixmap()
-#        thread = Thread(self)
-#        thread.changePixmap.connect(self.setPixmap)  
-#        thread.start()
-#    
-#    def paintEvent(self, event):
-#        self.labelCamera.setPixmap(self.image)
-#
-#    @pyqtSlot(QPixmap)
-#    def setPixmap(self, image):
-#        if image.isNull():
-#            print("Viewer Dropped frame!")
-#        self.image = image
-#        self.update()
-#        
-#        
-#    """Проверить реализацию записи пользователя в БД"""
-#    def SignUp(self):
-#        CSV = CSVDatabase()
-#        fName = self.lineEditFName.text() # first name 
-#        lName = self.lineEditLName.text() # last name
-#        mName = self.lineEditMName.text() # middle name
-#        phone = self.lineEditPhone.text() 
-#        #insert user in DB
-#        newID = NumOfLines(usersTable)
-#        print("new ID = ", newID)
-#        print("User:")
-#        user = User(newID, phone, fName, lName, mName)
-#        user._print()
-#        print("Result:")
-#        print(CSV.AddUser(user))
-##        print(NumOfLines("../infrastructure/Database/Users/Users.csv"))
-#        #---------------------
-##        Сделать инициализацию детектора только один раз?
-#        rec = face_recognizer.FaceRecognizer.create(FRName)
-#        rec.init(dllPath) # передавать через параметры
-#        rec.XMLPath(dbPath)
-#        cap = cv2.VideoCapture(0)
-#        UID = rec.getUID()
-#        name = "UNKNOWN"
-#        while(True): 
-#            _, f = cap.read()
-#            (ID, (x, y, w, h)) = rec.recognize(f)
-#            if (ID != UID):
-#              name = str(ID) #Можно выводить имя пользователя
-#              cv2.putText(f, "You are already a member. Press Q to exit" , (10,460), 
-#                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
-#            else:
-#              cv2.putText(f, "Press R to register" , (10,460), 
-#                          cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
-#            cv2.rectangle(f, (x, y), (x + w, y + h), (0, 255, 0), 1)
-#            cv2.putText(f, name , (x - 10  ,y-5),
-#                        cv2.FONT_HERSHEY_SIMPLEX, 1, (219, 132, 58), 2)
-#            cv2.imshow("web", f)
-#            ch = cv2.waitKey(1)
-#            if (ch & 0xFF == ord('r') or ch & 0xFF == ord('R')) and ID == UID:
-#                checkID = rec.register(f,  newID) #Необходимо генерировать новый ID
-#                break
-#            if ch & 0xFF == ord('q') or ch & 0xFF == ord('Q'):
-#                break
-#        cap.release()
-#        cv2.destroyAllWindows()
-#        self.close()
-#        self.loginWin = LoginWindow()
-#        self.loginWin.show()
-#       
-#    
-#    def EnableBtn(self):
-#        if(len(self.lineEditFName.text()) > 0 and  len(self.lineEditLName.text()) > 0 and
-#            len(self.lineEditMName.text()) > 0 and  len(self.lineEditPhone.text()) > 0 ):
-#             self.btnSignUp.setEnabled(True)
-#        else:
-#             self.btnSignUp.setEnabled(False)
-        
+       
 class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     def __init__(self, ID):
         super().__init__()
