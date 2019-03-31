@@ -76,7 +76,7 @@ class Thread(QThread):
             self.returnID.emit(ID)
             
 #получить newID из основного потока
-    def register(self, newID):
+    def passNewID(self, newID):
         self.newID = newID
         self.check = True #флаг того, что newID получен и можно регистрировать
         
@@ -228,7 +228,7 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         user._print()
         print("Result:")
         print(CSV.AddUser(user))
-        self.thread.register(newID)
+        self.thread.passNewID(newID)
         
        
 class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
