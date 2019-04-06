@@ -282,12 +282,15 @@ class StartWindow(QtWidgets.QMainWindow, StartWin.Ui_MainWindow):
         mName = self.lineEditMName.text() # middle name
         phone = self.lineEditPhone.text() 
         #insert user in DB
-        newID = NumOfLines(usersTable)
-        user = User(newID, phone, fName, lName, mName)
+        user = User(-1, phone, fName, lName, mName)
         user._print()
-        print("Result:")
-        print(CSV.AddUser(user))
-        self.thread.passNewID(newID)
+        newID = CSV.AddUser(user)
+        print("Result: ")
+        if(newID == -1):
+            print("This user is already registered")
+        else:
+            print("ID = ", newID)
+            self.thread.passNewID(newID)
         
        
 class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
@@ -519,6 +522,9 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
     def Add(self):
         title = self.lineEditTitle.text()
         author = self.lineEditAuthor.text()
+        """Автор это не строка, а отдельный объект с полями ФИО и id,
+        более того, их может быть несколько у одной книги, поэтому нужны дополнительные
+        поля для добавления и редактирования авторов"""
         publisher = self.lineEditPublisher.text()
         date = self.lineEditDate.text()
         dateNow = str(datetime.now())
@@ -528,12 +534,16 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
         coverName = dateNow
         self.Cover.save("infrastructure/Database/Books/Covers/" + coverName + ".png")
         print(title, " ", author, " ", publisher, " ", date, " ",dateNow)
-        print("add")
+        authors = Author(0, 0, 0, 0)
+        book = Book(-1, coverName, title, date, publisher, authors)
+        CSV = CSVDatabase()
+        newID = CSV.AddBook(book)
+        if(newID == -1):
+            print("This book is already registered")
+        else:
+            print("ID = ", newID)
         self.close()
         
-    """Добавить путь до обложки в БД
-       В функции добавления новой обложки необходимо реализовать именование обложек
-        в соответствии с БД, проверять имя на уникальность и т.д"""
     def OpenFile(self):
         fileName = QFileDialog.getOpenFileName(self.labelPicture, 
                                                      'Open File',"",
