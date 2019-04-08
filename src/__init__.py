@@ -348,7 +348,7 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         print("AddBook")
     
     def GetInfoReaders(self):
-        self.table.clear()
+        self.table.setRowCount(0)
         self.table.setColumnCount(5)
          #disable editing
         self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -360,32 +360,31 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         
 #        CSV = CSVDatabase()
         User = self.CSV.GetAllUsers()
-        print(User[0].first_name)
-        rowPosition = self.table.rowCount()
-        print(rowPosition)
-        self.table.insertRow(rowPosition)
-        self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
-        self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
-        self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
-        self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
-        self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
-#        for i in enumerate(User):
-#            rowPosition = self.table.rowCount()
-#            print(rowPosition)
-#            self.table.insertRow(rowPosition)
-#            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
-#            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
-#            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
-#            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
-#            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
-#        #fit available space
-#        header = self.table.horizontalHeader()    
-#        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-#        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-#        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-#        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-#        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-#        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
+        #print(User[0].first_name)
+        #rowPosition = self.table.rowCount()
+        #print(rowPosition)
+        #self.table.insertRow(rowPosition)
+        #self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+        #self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+        #self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+        #self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+        #self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+        for i in enumerate(User):
+            rowPosition = self.table.rowCount()
+            self.table.insertRow(rowPosition)
+            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+        #fit available space
+        header = self.table.horizontalHeader()    
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
         #self.tableWidget.resizeColumnsToContents()
         print("GetInfoReaders")
         
@@ -486,20 +485,67 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         self.setupUi(self) #initial design
         self.setFixedSize(self.size())
         self.btnBook.clicked.connect(self.GetBook)
+        
+        CSV = CSVDatabase()
+        BBook = CSV.GetBorrowedBooks()
+        Book = BBook[0]
+        DateB = BBook[1]
+        DateR = BBook[2]
+        User = BBook[3]
+        
         #tabel 1 with borrowed books
         self.tableBooks1.setColumnCount(6)
         #disable editing
         self.tableBooks1.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         #Рассмотреть возможность вывода обложки книги в таблицу
-        self.tableBooks1.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+        self.tableBooks1.setHorizontalHeaderLabels(["Book ID", "Authors", "Title", 
                                                     "Publisher", "Publication date", "Borrow date"])
+        for i in enumerate(DateB):
+            if((DateR[i[0]] == "-1") and (int(User[i[0]].user_id) == self.ID)):
+                c = ", " # строка для разделения авторов
+                rowPosition = self.tableBooks1.rowCount()
+                self.tableBooks1.insertRow(rowPosition)
+                self.tableBooks1.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
+                authorsStr = "" # строка для размещения в ней ФИО авторов
+                for j in enumerate(Book[i[0]].authors):
+                    if (j[0] == len(Book[i[0]].authors) - 1):
+                        c = ''
+                    authorsStr += (Book[i[0]].authors[j[0]].first_name + ' ' +
+                                Book[i[0]].authors[j[0]].last_name + ' ' +
+                                Book[i[0]].authors[j[0]].middle_name + c)
+                self.tableBooks1.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
+                self.tableBooks1.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[i[0]].title))
+                self.tableBooks1.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[i[0]].publisher))
+                self.tableBooks1.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[i[0]].year))
+                self.tableBooks1.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[i[0]]))
+        
         self.tableBooks1.resizeColumnsToContents()
         #tabel 2 with previously taken books
         self.tableBooks2.setColumnCount(7)
 #        #disable editing
         self.tableBooks2.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.tableBooks2.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+        self.tableBooks2.setHorizontalHeaderLabels(["Book ID", "Authors", "Title", 
                                                     "Publisher", "Publication date", "Borrow date", "Return date"])
+        for k in enumerate(DateB):
+            if((DateR[k[0]] != "-1") and (int(User[k[0]].user_id) == self.ID)):
+                c = ", " # строка для разделения авторов
+                rowPosition = self.tableBooks2.rowCount()
+                self.tableBooks2.insertRow(rowPosition)
+                self.tableBooks2.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[k[0]].book_id))
+                authorsStr = "" # строка для размещения в ней ФИО авторов
+                for t in enumerate(Book[k[0]].authors):
+                    if (t[0] == len(Book[k[0]].authors) - 1):
+                        c = ''
+                    authorsStr += (Book[k[0]].authors[t[0]].first_name + ' ' +
+                                Book[k[0]].authors[t[0]].last_name + ' ' +
+                                Book[k[0]].authors[t[0]].middle_name + c)
+                self.tableBooks2.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
+                self.tableBooks2.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[k[0]].title))
+                self.tableBooks2.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[k[0]].publisher))
+                self.tableBooks2.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[k[0]].year))
+                self.tableBooks2.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[k[0]]))
+                self.tableBooks2.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(DateR[k[0]]))
+                
         self.tableBooks2.resizeColumnsToContents()    
     
     def GetBook(self):
@@ -522,9 +568,33 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
     def Add(self):
         title = self.lineEditTitle.text()
         author = self.lineEditAuthor.text()
-        """Автор это не строка, а отдельный объект с полями ФИО и id,
-        более того, их может быть несколько у одной книги, поэтому нужны дополнительные
-        поля для добавления и редактирования авторов"""
+        """Нескольких авторов одной книги вводить в форму через запятную"""
+        authors = []
+        fname = ""
+        lname = ""
+        mname = ""
+        flag = 0
+        for c in authors:
+            if(author[c] == ' '):
+                flag = flag + 1
+                continue
+            if(author[c] == ','):
+                flag = 0
+                authors.append(Author(-1, fname, lname, mname))
+                fname = ""
+                lname = ""
+                mname = ""
+                continue
+            if(flag == 0):
+                fname += author[c]
+                continue
+            if(flag == 1):
+                lname += author[c]
+                continue
+            if(flag == 2):
+                mname += author[c]
+                continue
+        
         publisher = self.lineEditPublisher.text()
         date = self.lineEditDate.text()
         dateNow = str(datetime.now())
@@ -534,7 +604,6 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
         coverName = dateNow
         self.Cover.save("infrastructure/Database/Books/Covers/" + coverName + ".png")
         print(title, " ", author, " ", publisher, " ", date, " ",dateNow)
-        authors = Author(0, 0, 0, 0)
         book = Book(-1, coverName, title, date, publisher, authors)
         CSV = CSVDatabase()
         newID = CSV.AddBook(book)
@@ -573,7 +642,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
-    window = StartWindow()  
+    window = AdminWindow(1)  
     window.show() 
     app.exec_()  
 
