@@ -348,7 +348,7 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         print("AddBook")
     
     def GetInfoReaders(self):
-        self.table.setRowCount(0)
+        self.table.clear()
         self.table.setColumnCount(5)
          #disable editing
         self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -360,24 +360,32 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
         
 #        CSV = CSVDatabase()
         User = self.CSV.GetAllUsers()
-        print(User[0].user_id)
-        for i in enumerate(User):
-            rowPosition = self.table.rowCount()
-            print(rowPosition)
-            self.table.insertRow(rowPosition)
-            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
-            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
-            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
-            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
-            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
-        #fit available space
-        header = self.table.horizontalHeader()    
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
+        print(User[0].first_name)
+        rowPosition = self.table.rowCount()
+        print(rowPosition)
+        self.table.insertRow(rowPosition)
+        self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+        self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+        self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+        self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+        self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+#        for i in enumerate(User):
+#            rowPosition = self.table.rowCount()
+#            print(rowPosition)
+#            self.table.insertRow(rowPosition)
+#            self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
+#            self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
+#            self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
+#            self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
+#            self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
+#        #fit available space
+#        header = self.table.horizontalHeader()    
+#        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+#        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+#        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+#        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+#        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+#        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
         #self.tableWidget.resizeColumnsToContents()
         print("GetInfoReaders")
         
@@ -477,18 +485,18 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         self.ID = ID
         self.setupUi(self) #initial design
         self.setFixedSize(self.size())
-        self.pushButton.clicked.connect(self.GetBook)
+        self.btnBook.clicked.connect(self.GetBook)
         #tabel 1 with borrowed books
-        self.tableBooks.setColumnCount(6)
+        self.tableBooks1.setColumnCount(6)
         #disable editing
-        self.tableBooks.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableBooks1.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         #Рассмотреть возможность вывода обложки книги в таблицу
-        self.tableBooks.setHorizontalHeaderLabels(["ID", "Author", "Title", 
+        self.tableBooks1.setHorizontalHeaderLabels(["ID", "Author", "Title", 
                                                     "Publisher", "Publication date", "Borrow date"])
-        self.tableBooks.resizeColumnsToContents()
+        self.tableBooks1.resizeColumnsToContents()
         #tabel 2 with previously taken books
         self.tableBooks2.setColumnCount(7)
-        #disable editing
+#        #disable editing
         self.tableBooks2.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableBooks2.setHorizontalHeaderLabels(["ID", "Author", "Title", 
                                                     "Publisher", "Publication date", "Borrow date", "Return date"])
