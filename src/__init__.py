@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, re
 import numpy as np
 import cv2
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -90,44 +90,58 @@ class Thread(QThread):
             
     def bookRecognition(self):
         rec = book_recognizer.Recognizer()
-        rec.Create(BRName)
-#        #---Функция БД, присваивающая templ список с изображениями обложек-----------
-        templ = [ os.path.join("infrastructure/Database/Books/Covers/", b) 
-                for b in os.listdir("infrastructure/Database/Books/Covers/")
-                 if os.path.isfile(os.path.join("infrastructure/Database/Books/Covers/", b)) ]
-        #-----------------------------------------------------------------------------
+        rec.create(BRName)
+        templ = []
+
+        for i in os.listdir("infrastructure/Database/Books/Covers/"):
+            if (re.fullmatch('\d+.png', i)):
+                templ.append(os.path.join("infrastructure/Database/Books/Covers/", i))
+        
+#   
         cap = cv2.VideoCapture(0)
         i = 0
+        det = cv2.ORB_create()
         l = len(templ)
-        res_arr = []
+        resArr = []
+        desTpl = []
         _, frame = cap.read()
         ym, xm, _ = frame.shape
         for i in range(l):
-            res_arr.append(0)
+            resArr.append(0)
+    
+        #Список с ключевыми точками шаблонов
+        for t in templ:
+            tpl = cv2.imread(t)
+            tplGray = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
+            _, tmp = det.detectAndCompute(tplGray, None)
+            desTpl.append(tmp)
+        
+        for k in range(0,100):
+            _, frame = cap.read()
+            cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), (xm//2 + 110, ym//2 + 150), (0, 255, 255))
+            cv2.putText(frame, '0%', (200, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+            cv2.imshow("web", frame)
+            cv2.waitKey(1)   
+            
         while(True): 
             _, frame = cap.read()
-            crop_frame = frame[ym//2 - 170 : ym//2 + 170, xm//2 - 120 : xm//2 + 120]
-            if (self.check == True):
-               cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150),
-                          (xm//2 + 110, ym//2 + 149),
-                           (0, 255, 255))
-               recognize_result = rec.Recognize(crop_frame, templ, 0.7)
-               print(res_arr, "\n")
-               for i in range(l):
-                 res_arr[i] = res_arr[i] + recognize_result[i]
-               if max(res_arr) > 200:
-                   ID = res_arr.index(max(res_arr))
-                   self.returnID.emit(ID)
-                   res_arr.clear()
-                   for i in range(l):
-                      res_arr.append(0)
-                   self.check = False;            
-            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
-                                         QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(convertToQtFormat)
-            resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
-            self.changePixmap.emit(resizeImage)       
+            cropFrame = frame[ym//2 - 170 : ym//2 + 170, xm//2 - 120 : xm//2 + 120]
+            cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), (xm//2 + 110, ym//2 + 150), (0, 255, 255))
+            recognizeResult = rec.recognize(cropFrame, desTpl, 0.7)
+            out = str(100 * max(resArr) / 400)
+            out = out + '%'
+            cv2.putText(frame, out, (200, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+            cv2.imshow("web", frame)
+            cv2.waitKey(1)   
+            for i in range(l):
+                resArr[i] = resArr[i] + recognizeResult[i]
+            if max(resArr) > 400:
+                break
+        print(resArr, "\n")
+        cap.release()
+        cv2.destroyAllWindows()
+        idRes = resArr.index(max(resArr))
+        print("Book id = ", idRes)
         
 #получить newID из основного потока
     def passNewID(self, newID):
