@@ -3,47 +3,42 @@ from abc import ABC, abstractmethod
 
 class BookRecognizer(ABC):
     @abstractmethod
-    def Create(self, det_name):
+    def create(self, detName):
         """Create recognizer"""
         
     @abstractmethod
-    def Recognize(self, frame, tpls, coeff):
+    def recognize(self, frame, tpls, coeff):
         """Recognize book"""
         
 
 class Recognizer(BookRecognizer):
     
-    def Create(self, det_name):
+    def create(self, detName):
         detectors = {"ORB":1, "SIFT":2, "SURF":3}
         
         try:
-            detectors[det_name]
+            detectors[detName]
             
         except(KeyError):
             print("Wrong detector name")
             
         else:
-            if (det_name == "ORB"):
+            if (detName == "ORB"):
                 self.det = cv2.ORB_create() 
-            elif (det_name == "SIFT"):
+            elif (detName == "SIFT"):
                 self.det = cv2.xfeatures2d.SIFT_create()
-            elif (det_name == "SURF"):
+            elif (detName == "SURF"):
                 self.det = cv2.xfeatures2d.SURF_create()
 
             
-    def Recognize(self, frame, tpls, coeff):
+    def recognize(self, frame, desTpls, coeff):
         arr = []
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        kp_frame, des_frame = self.det.detectAndCompute(frame_gray, None)
+        frameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _, desFrame = self.det.detectAndCompute(frameGray, None)
 
-        for t in tpls:
-            tpl = cv2.imread(t)
+        for t in desTpls:
             matcher = cv2.BFMatcher()
-            tpl_gray = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
-            
-            kp_tpl, des_tpl = self.det.detectAndCompute(tpl_gray, None)
-        
-            matches = matcher.knnMatch(des_tpl, des_frame, k = 2)
+            matches = matcher.knnMatch(t, desFrame, k = 2)
             good = []
             
             for m,n in matches:
