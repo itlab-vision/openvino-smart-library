@@ -66,7 +66,7 @@ class Ui_MainWindow(object):
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.tableBooks2 = QtWidgets.QTableWidget(self.tab_2)
-        self.tableBooks2.setGeometry(QtCore.QRect(0, 0, 811, 601))
+        self.tableBooks2.setGeometry(QtCore.QRect(0, 0, 651, 601))
         self.tableBooks2.setObjectName("tableBooks2")
         self.tableBooks2.setColumnCount(0)
         self.tableBooks2.setRowCount(0)
@@ -85,7 +85,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Reader"))
         self.labelHello.setText(_translate("MainWindow", "Welcome,"))
         self.btnBook.setText(_translate("MainWindow", "Get or return a book"))
-        self.labelInfo2.setText(_translate("MainWindow", "Place the book in the selcted area"))
+        self.labelInfo2.setText(_translate("MainWindow", "Place the book in the selected area"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Borrowed books"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Books taken before"))
 
