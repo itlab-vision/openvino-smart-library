@@ -241,7 +241,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
             # захожу в цикл по строкам файла Books.csv с фиксированным значением user_id
             FileUsersR.seek(0) # возвращаю указатель в начало файла
             for lineUsers in readerUsers:
-                # нахожу нужного пользователя и добавляю его данны в user[]
+                # нахожу нужного пользователя и добавляю его данные в user[]
                 if (lineUsers["user_id"] == lineReaders["user_id"]):
                     user.append(User(lineUsers["user_id"], lineUsers["phone"], lineUsers["first_name"], lineUsers["last_name"], lineUsers["middle_name"]))
                     break
@@ -263,6 +263,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
             date2.append(lineReaders["return_date"])
             #
             # захожу в цикл по строкам файла Books.csv с фиксированным значением book_id
+            FileBooksR.seek(0) # возвращаю указатель в начало файла
             for lineBooks in readerBooks:
                 # нахожу нужную книгу
                 if (lineBooks["book_id"] ==  lineReaders["book_id"]):
