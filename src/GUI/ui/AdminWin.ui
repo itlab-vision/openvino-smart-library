@@ -148,7 +148,7 @@
      <rect>
       <x>20</x>
       <y>470</y>
-      <width>481</width>
+      <width>331</width>
       <height>41</height>
      </rect>
     </property>
@@ -158,7 +158,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Place the book in the selcted area</string>
+     <string>Place the book in the selected area</string>
     </property>
    </widget>
   </widget>

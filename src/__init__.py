@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, re
 import numpy as np
 import cv2
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -86,48 +86,87 @@ class Thread(QThread):
             resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
             self.changePixmap.emit(resizeImage)
             self.returnID.emit(ID)
-            print("IMWORKING")
             
     def bookRecognition(self):
         rec = book_recognizer.Recognizer()
-        rec.Create(BRName)
-#        #---Функция БД, присваивающая templ список с изображениями обложек-----------
-        templ = [ os.path.join("infrastructure/Database/Books/Covers/", b) 
-                for b in os.listdir("infrastructure/Database/Books/Covers/")
-                 if os.path.isfile(os.path.join("infrastructure/Database/Books/Covers/", b)) ]
-        #-----------------------------------------------------------------------------
+        rec.create(BRName)
+        templ = []
+
+        for i in os.listdir("infrastructure/Database/Books/Covers/"):
+            if (re.fullmatch('\d+.png', i)):
+                templ.append(os.path.join("infrastructure/Database/Books/Covers/", i))
+        
+#   
         cap = cv2.VideoCapture(0)
         i = 0
+        det = cv2.ORB_create()
         l = len(templ)
-        res_arr = []
+        resArr = []
+        desTpl = []
         _, frame = cap.read()
         ym, xm, _ = frame.shape
         for i in range(l):
-            res_arr.append(0)
+            resArr.append(0)
+    
+        #Список с ключевыми точками шаблонов
+        for t in templ:
+            tpl = cv2.imread(t)
+            tplGray = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
+            _, tmp = det.detectAndCompute(tplGray, None)
+            desTpl.append(tmp)
+        
+#        for k in range(0,100):
+#            _, frame = cap.read()
+#            cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), 
+#                          (xm//2 + 110, ym//2 + 150), (0, 255, 255))
+#            cv2.putText(frame, '0%', (200, 200),
+#                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+#            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#            convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1],
+#                                       rgbImage.shape[0], QImage.Format_RGB888)
+#            pixmap = QPixmap.fromImage(convertToQtFormat)
+#            resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
+#            self.changePixmap.emit(resizeImage)      
+            
         while(True): 
             _, frame = cap.read()
-            crop_frame = frame[ym//2 - 170 : ym//2 + 170, xm//2 - 120 : xm//2 + 120]
-            if (self.check == True):
-               cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150),
-                          (xm//2 + 110, ym//2 + 149),
-                           (0, 255, 255))
-               recognize_result = rec.Recognize(crop_frame, templ, 0.7)
-               print(res_arr, "\n")
-               for i in range(l):
-                 res_arr[i] = res_arr[i] + recognize_result[i]
-               if max(res_arr) > 200:
-                   ID = res_arr.index(max(res_arr))
-                   self.returnID.emit(ID)
-                   res_arr.clear()
-                   for i in range(l):
-                      res_arr.append(0)
-                   self.check = False;            
+            cropFrame = frame[ym//2 - 170 : ym//2 + 170,
+                                  xm//2 - 120 : xm//2 + 120]
+            cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), 
+                              (xm//2 + 110, ym//2 + 145), (0, 255, 255))
+            
+            if (self.check == True and resArr):
+#                cropFrame = frame[ym//2 - 170 : ym//2 + 170,
+#                                  xm//2 - 120 : xm//2 + 120]
+#                cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), 
+#                              (xm//2 + 110, ym//2 + 150), (0, 255, 255))
+                recognizeResult = rec.recognize(cropFrame, desTpl, 0.7)
+                out = str(100 * max(resArr) / 400)
+                out = out + '%'
+                cv2.putText(frame, out, (200, 200), cv2.FONT_HERSHEY_SIMPLEX,
+                                                          1, (0, 255, 255), 2)
+                for i in range(l):
+                    resArr[i] = resArr[i] + recognizeResult[i]
+                if max(resArr) > 400:
+                    ID = resArr.index(max(resArr))
+                    self.returnID.emit(ID)
+                    resArr.clear()
+                    for i in range(l):
+                       resArr.append(0)
+                    self.check = False; 
+                    
             rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
                                          QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(convertToQtFormat)
             resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
-            self.changePixmap.emit(resizeImage)       
+            self.changePixmap.emit(resizeImage)   
+            
+            
+            
+#        print(resArr, "\n")
+#        idRes = resArr.index(max(resArr))
+#        print("Book id = ", idRes)
         
 #получить newID из основного потока
     def passNewID(self, newID):
@@ -311,6 +350,8 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
                                                  self.comboBox.currentIndex()) 
         self.CSV = CSVDatabase()
         self.labelHello.setText(self.labelHello.text()+ self.CSV.GetUser(ID)[0].first_name)
+        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.table.verticalHeader().hide()
         self.GetInfoBooks()
         self.btnBook.clicked.connect(self.GetBook)
         self.btnAddBook.clicked.connect(self.AddBook) 
@@ -350,25 +391,11 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     def GetInfoReaders(self):
         self.table.setRowCount(0)
         self.table.setColumnCount(5)
-         #disable editing
-        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
         self.table.setHorizontalHeaderLabels(["ID", "Phone", "First name",
                                                      "Last name", "Middle name"])
         #insert row
-        self.table.verticalHeader().hide()
-        
-#        CSV = CSVDatabase()
         User = self.CSV.GetAllUsers()
-        #print(User[0].first_name)
-        #rowPosition = self.table.rowCount()
-        #print(rowPosition)
-        #self.table.insertRow(rowPosition)
-        #self.table.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(User[i[0]].user_id))
-        #self.table.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(User[i[0]].phone))
-        #self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
-        #self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
-        #self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
         for i in enumerate(User):
             rowPosition = self.table.rowCount()
             self.table.insertRow(rowPosition)
@@ -377,29 +404,16 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
             self.table.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(User[i[0]].first_name))
             self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(User[i[0]].last_name))
             self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(User[i[0]].middle_name))
-        #fit available space
-        header = self.table.horizontalHeader()    
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
-        #self.tableWidget.resizeColumnsToContents()
+        self.table.resizeColumnsToContents()
         print("GetInfoReaders")
         
     def GetInfoBooks(self):
         self.table.setRowCount(0)
         self.table.setColumnCount(6)
-         #disable editing
-        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
         self.table.setHorizontalHeaderLabels(["ID", "Author", "Title", 
-                                                     "Publisher", "Publication date", "Cover"])
+                                                    "Publisher", "Publication date", "Cover"])
         #insert row
-        self.table.verticalHeader().hide()
-        
-#        CSV = CSVDatabase()
         Book = self.CSV.GetAllBooks()
         for i in enumerate(Book):
             c = ", " # строка для разделения авторов
@@ -418,29 +432,18 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
             self.table.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[i[0]].publisher))
             self.table.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[i[0]].year))
             self.table.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(Book[i[0]].file_path))
-        #fit available space
-        header = self.table.horizontalHeader()    
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
+        self.table.resizeColumnsToContents() 
         print("GetInfoBooks")
     
     def GetInfoBB(self):
         self.table.setRowCount(0)
         self.table.setColumnCount(9)
-        #disable editing
-        self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Set the table headers
         self.table.setHorizontalHeaderLabels(["User ID", "Book ID", "First name", "Last name",
                                                      "Middle name", "Phone", "Title", "Borrow date",
                                                      "Return date"])
         #insert row
         self.table.verticalHeader().hide()
-        
-#        CSV = CSVDatabase()
         BBook = self.CSV.GetBorrowedBooks()
         Book = BBook[0]
         DateB = BBook[1]
@@ -458,17 +461,7 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
             self.table.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(Book[i[0]].title))
             self.table.setItem(rowPosition, 7, QtWidgets.QTableWidgetItem(DateB[i[0]]))
             self.table.setItem(rowPosition, 8, QtWidgets.QTableWidgetItem(DateR[i[0]]))
-        #fit available space
-        header = self.table.horizontalHeader()    
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(6, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(7, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(8, QtWidgets.QHeaderView.Stretch)
+        self.table.resizeColumnsToContents() 
         print("GetInfoBBooks")
         
     def closeEvent(self, event):
@@ -485,7 +478,19 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         self.setupUi(self) #initial design
         self.setFixedSize(self.size())
         self.btnBook.clicked.connect(self.GetBook)
+        self.CSV = CSVDatabase()
+        self.labelHello.setText(self.labelHello.text()+ 
+                                self.CSV.GetUser(ID)[0].first_name)
         
+        self.labelInfo2.hide()
+        
+        self.image = QPixmap()
+        self.thread = Thread("book")
+        self.thread.changePixmap.connect(self.setPixmap) 
+        self.thread.returnID.connect(self.getBookID)
+        self.thread.start()
+        
+        self.btnBook.clicked.connect(self.GetBook)
         CSV = CSVDatabase()
         BBook = CSV.GetBorrowedBooks()
         Book = BBook[0]
@@ -495,6 +500,7 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         
         #tabel 1 with borrowed books
         self.tableBooks1.setColumnCount(6)
+        self.tableBooks1.verticalHeader().hide()
         #disable editing
         self.tableBooks1.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         #Рассмотреть возможность вывода обложки книги в таблицу
@@ -520,9 +526,11 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
                 self.tableBooks1.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[i[0]]))
         
         self.tableBooks1.resizeColumnsToContents()
+        
         #tabel 2 with previously taken books
         self.tableBooks2.setColumnCount(7)
-#        #disable editing
+        self.tableBooks2.verticalHeader().hide()
+#       #disable editing
         self.tableBooks2.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableBooks2.setHorizontalHeaderLabels(["Book ID", "Authors", "Title", 
                                                     "Publisher", "Publication date", "Borrow date", "Return date"])
@@ -547,10 +555,25 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
                 self.tableBooks2.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(DateR[k[0]]))
                 
         self.tableBooks2.resizeColumnsToContents()    
+        
+    @pyqtSlot(QPixmap)
+    def setPixmap(self, image):
+        if image.isNull():
+            print("Viewer Dropped frame!")
+        self.image = image
+        self.labelCamera.setPixmap(self.image)
+        self.update()  
+        
+    @pyqtSlot(int)   
+    def getBookID(self, ID):
+         self.bookID = ID
+         self.labelInfo2.hide()
+         print(self.bookID)
     
     def GetBook(self):
-        print("hello")
-
+        self.thread.recognizeBook()
+        self.labelInfo2.show()
+        
 class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -642,7 +665,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
-    window = AdminWindow(1)  
+    window = StartWindow()  
     window.show() 
     app.exec_()  
 

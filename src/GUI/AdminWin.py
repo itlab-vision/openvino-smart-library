@@ -60,7 +60,7 @@ class Ui_MainWindow(object):
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.labelInfo2 = QtWidgets.QLabel(self.centralwidget)
-        self.labelInfo2.setGeometry(QtCore.QRect(20, 470, 481, 41))
+        self.labelInfo2.setGeometry(QtCore.QRect(20, 470, 331, 41))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.labelInfo2.setFont(font)
@@ -83,5 +83,5 @@ class Ui_MainWindow(object):
         self.comboBox.setItemText(0, _translate("MainWindow", "books"))
         self.comboBox.setItemText(1, _translate("MainWindow", "readers"))
         self.comboBox.setItemText(2, _translate("MainWindow", "borrowed books"))
-        self.labelInfo2.setText(_translate("MainWindow", "Place the book in the selcted area"))
+        self.labelInfo2.setText(_translate("MainWindow", "Place the book in the selected area"))
 
