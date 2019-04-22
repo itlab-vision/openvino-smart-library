@@ -597,26 +597,31 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
         lname = ""
         mname = ""
         flag = 0
-        for c in authors:
-            if(author[c] == ' '):
+        for c in author:
+            if(flag == 4):
+                flag = 0
+                if(c == ' '):
+                    continue;
+            if(c == ' '):
                 flag = flag + 1
                 continue
-            if(author[c] == ','):
-                flag = 0
+            if(c == ','):
+                flag = 4
                 authors.append(Author(-1, fname, lname, mname))
                 fname = ""
                 lname = ""
                 mname = ""
                 continue
             if(flag == 0):
-                fname += author[c]
+                fname += c
                 continue
             if(flag == 1):
-                lname += author[c]
+                lname += c
                 continue
             if(flag == 2):
-                mname += author[c]
+                mname += c
                 continue
+        authors.append(Author(-1, fname, lname, mname))
         
         publisher = self.lineEditPublisher.text()
         date = self.lineEditDate.text()
@@ -665,7 +670,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
-    window = StartWindow()  
+    window = AdminWindow(1)  
     window.show() 
     app.exec_()  
 
