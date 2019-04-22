@@ -166,6 +166,8 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
                 new_author_id = NumOfLines(path + "Books/Authors.csv")
                 writerAuthors.writerow({'author_id': new_author_id, 'first_name': aut.first_name, 'last_name': aut.last_name, 'middle_name': aut.middle_name})
             writerAuthorship.writerow({'book_id': new_book_id, 'author_id': new_author_id})
+            FileAuthorsR.seek(0)
+            FileAuthorsW.seek(0)
         
         FileBooksR.close()
         FileBooksW.close()
