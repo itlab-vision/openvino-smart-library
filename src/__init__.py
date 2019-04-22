@@ -366,8 +366,13 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
             self.GetInfoBB()
         
     def GetBook(self):
-        self.thread.recognizeBook()
-        self.labelInfo2.show()
+        #self.thread.recognizeBook()
+        #self.labelInfo2.show()
+        userId = 10 # получить id текущего пользователя
+        bookId = 10 # получить id распознанной книги
+        CSV = CSVDatabase()
+        CSV.ChangeBookStatus(userId, bookId)
+        print("Book`s status was changed")
         
     @pyqtSlot(QPixmap)
     def setPixmap(self, image):
@@ -571,8 +576,14 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
          print(self.bookID)
     
     def GetBook(self):
-        self.thread.recognizeBook()
-        self.labelInfo2.show()
+        #self.thread.recognizeBook()
+        #self.labelInfo2.show()
+        userId = 10 # получить id текущего пользователя
+        bookId = 10 # получить id распознанной книги
+        CSV = CSVDatabase()
+        CSV.ChangeBookStatus(userId, bookId)
+        print("Book`s status was changed")
+        # при нажатии на кнопку "Get book" этот метод срабатывает дважды
         
 class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
     def __init__(self):
@@ -670,7 +681,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # new QApplication
-    window = AdminWindow(1)  
+    window = ReaderWindow(1)  
     window.show() 
     app.exec_()  
 

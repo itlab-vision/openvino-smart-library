@@ -282,20 +282,44 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService, IDatabaseFRM, IDatabaseGUI
         FileReadersR.close()
         return (book, date1, date2, user) # tuple()
         
-    def ChangeBookStatus(self, user_id, book_id, status):
-        FileReadersW = open(path + "Readers.csv", "a", newline = '')
+    def ChangeBookStatus(self, user_id, book_id):
+        status = 1
+        borrowDate = ""
+        FileReadersR = open(path + "Readers.csv", "r", newline = '')
         # статус = 1 - взять книгу
         # статус = 2 - сдать книгу
         # return_date == -1 - книга не сдана
-        fieldnames = ['user_id', 'book_id', 'borrow_date', 'return_date']
-        writer = csv.DictWriter(FileReadersW, fieldnames = fieldnames, delimiter = ',')
+        reader = csv.DictReader(FileReadersR, delimiter = ',')
+        for line in reader:
+                # нахожу нужную дату по id книги и пользователя
+                if (line["book_id"] == str(book_id) and line["user_id"] == str(user_id)):
+                    # если эту книгу этот пользователь уже брал, то оформим новую запись
+                    if (line["return_date"] != '-1'):
+                        continue
+                    # если же он книгу не взял, но не вернул, то сдаем книгу
+                    borrowDate = line["borrow_date"]
+                    status = 2
+                    break
         if (status == 1):
-            writer.writerow({'user_id': user_id, 'book_id': book_id, 'borrow_date': datetime.strftime(datetime.now(), "%d%m"), 'return_date': "-1"})
+            FileReadersW = open(path + "Readers.csv", "a", newline = '')
+            fieldnames = ['user_id', 'book_id', 'borrow_date', 'return_date']
+            writer = csv.DictWriter(FileReadersW, fieldnames = fieldnames, delimiter = ',')
+            writer.writerow({'user_id': user_id, 'book_id': book_id, 'borrow_date': datetime.strftime(datetime.now(), "%d.%m.%Y"), 'return_date': "-1"})
+            FileReadersW.close()
         if (status == 2):
-            """HELP!"""
-            # не могу найти способ перезаписать конкретную ячейку без перезаписи всего файла
-        
-        FileReadersW.close()
+            s = str(user_id) + ',' + str(book_id) + ',' + borrowDate + ','
+            FileReadersR.seek(0)
+            lines = FileReadersR.readlines()
+            FileReadersOverW = open(path + "Readers.csv", "w", newline = '')
+            for line in lines:
+                line = line.strip()
+                if line == s + '-1':
+                    FileReadersOverW.write(s + datetime.strftime(datetime.now(), "%d.%m.%Y") + '\r' + '\n')
+                else:
+                    FileReadersOverW.write(line + '\r' + '\n')
+            FileReadersOverW.close()
+            
+        FileReadersR.close()
 
 if __name__ == "__main__":
     """main"""
