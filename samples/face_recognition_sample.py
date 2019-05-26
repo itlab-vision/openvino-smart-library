@@ -6,18 +6,18 @@ sys.path.append("..\\src\\modules")
 import face_recognizer
 
 def build_argparse():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--recognizer', type = str, default = "PVL",
-                        dest = 'recognize', help = 'type of recognizer')
-    parser.add_argument('-d', '--dll', type = str, default = "PVL_wrapper.dll",
+    parser = argparse.ArgumentParser(description='face recognizer sample')
+    parser.add_argument('-r', '--recognizer', type = str, default = 'PVL',
+                        dest = 'recognizer', help = 'type of recognizer')
+    parser.add_argument('-d', '--dll', type = str, default = 'PVL_wrapper.dll',
                         dest = 'dll', help = 'dll')
     parser.add_argument('-i', '--im_dir', type = str,
                         dest = 'image', help = 'image')
     parser.add_argument('-v', '--video', type = str,
                         dest = 'video', help = 'video')
-    parser.add_argument('-w', '--wbcam', type = int, default = 0, 
+    parser.add_argument('-w', '--webcam', type = int, default = 0, 
                         dest = 'webcam', help = 'webcam')
-    parser.add_argument('-m', '--model', type = str, default = "defaultdb.xml" ,
+    parser.add_argument('-m', '--model', type = str, default = 'defaultdb.xml' ,
                         dest = 'model', help = 'data base with faces')
     args = parser.parse_args()
     return args
@@ -32,44 +32,56 @@ def showText(f, x, y, h, w, name):
                           cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
 def show(src, uID):
     cap = cv2.VideoCapture(src)
-    fCount =  cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
+    fCount =  cap.get(cv2.CAP_PROP_FRAME_COUNT)
     currCount = 0
     name = "UNKNOWN"
     hold = 1
     while(True): 
         _, f = cap.read()
+        (ID, (x, y, w, h)) = rec.recognize(f)
         currCount += 1
-        if fCount != -1.0 and  fCount == currCount - 1:
-          currCount = 0 #Or whatever as long as it is the same as next line
-          cap.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, 0)
-        (ID, (x, y, w, h)) = rec.Recognize(f)
+        if fCount != -1.0 and  fCount == currCount:
+          currCount = 0 
+          cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         name = str(ID)
         showText(f,x,y,h,w,name)
-        cv2.imshow(src, f)
+        cv2.imshow(str(src), f)
         ch = cv2.waitKey(hold)
         if ch & 0xFF == ord('r') and ID != uID:
-             tmp = rec.Register(f, rec.GetNewID())
+             tmp = rec.register(f, rec.GetNewID())
         if ch & 0xFF == ord('q'):
           break
     cap.release()
     
-recArgs = dict(name = frName, dll = dllPath , db= dbPath)
+recArgs = dict(name = '', dll = '' , db= '')
 args = build_argparse()
 
 if (args.recognizer != None):
-  recArgs["name"] = args.recognizer
+  recArgs['name'] = args.recognizer
   if (args.dll != None):
-    recArgs["dll"] = args.dll
+    recArgs['dll'] = args.dll
   if (args.model != None):
-    recArgs["db"] = args.model
+    recArgs['db'] = args.model
   rec = face_recognizer.FaceRecognizer.create(recArgs)
-  uID = rec.GetUID()
-  if (args.w != None):
+  uID = rec.getUID()
+  
+  if (args.image != None):
+      img = cv2.imread(args.image)
+      height, width, layers = img.shape
+      size = (width,height)
+      vName = 'tmp.avi'
+      out = cv2.VideoWriter(vName,cv2.VideoWriter_fourcc(*'XVID'), 1.0, size)
+      for i in range(2):
+         out.write(img)
+      out.release()
+      show(vName, uID)
+      os.remove('tmp.avi')
       
   elif (args.video != None):
+      show(args.video,uID)
       
-  elif (args.image != None):
-      
+  elif (args.webcam != None):
+      show(args.webcam ,uID)
     
     
 cv2.destroyAllWindows()
