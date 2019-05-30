@@ -14,7 +14,7 @@ static bool isOpen = false;
 static string dbPath = "defaultdb.xml";
 
 int GetNewID() {
-  return pvlFR->createNewPersonID();
+  return pvlFR->getNumRegisteredPersons()+1;
 }
 
 void SetDB(char* path) {

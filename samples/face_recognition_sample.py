@@ -47,8 +47,8 @@ def show(src, uID):
         showText(f,x,y,h,w,name)
         cv2.imshow(str(src), f)
         ch = cv2.waitKey(hold)
-        if ch & 0xFF == ord('r') and ID != uID:
-             tmp = rec.register(f, rec.GetNewID())
+        if ch & 0xFF == ord('r') and ID == uID:
+             tmp = rec.register(f, rec.getNewID())
         if ch & 0xFF == ord('q'):
           break
     cap.release()
