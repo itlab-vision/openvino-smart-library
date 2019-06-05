@@ -1,5 +1,5 @@
 class Role:
-    def __init__(self, role_id = -1, description = -1):
+    def __init__(self, role_id, description):
         self.role_id = role_id
         self.description = description
         
