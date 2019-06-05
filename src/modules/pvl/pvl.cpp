@@ -13,7 +13,11 @@ static Ptr<FaceRecognizer> pvlFR;
 static bool isOpen = false;
 static string dbPath = "defaultdb.xml";
 
-void GetPath(char* path) {
+int GetNewID() {
+  return pvlFR->getNumRegisteredPersons()+1;
+}
+
+void SetDB(char* path) {
   dbPath = (string)path;
 }
 

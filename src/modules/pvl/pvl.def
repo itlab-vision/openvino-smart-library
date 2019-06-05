@@ -3,4 +3,5 @@ EXPORTS
 Recognize
 Register
 UnknownID
-GetPath
+SetDB
+GetNewID

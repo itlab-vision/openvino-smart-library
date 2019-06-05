@@ -4,15 +4,14 @@ from abc import ABC, abstractmethod
 
 class FaceRecognizer(ABC):
      @staticmethod
-     def create(name):
-         if name == "PVL":
-            rec = PVLRecognizer()
-            return rec
+     def create(args): #Args - dict("name", "dll", "db")
+         if args["name"] == 'PVL':
+            return PVLRecognizer(args["dll"], args["db"])
          else:
             raise Exception('Error: wrong recognizer name')
            
      @abstractmethod
-     def register(self, img):
+     def register(self, img, ID):
          """Register new reader"""
          
      @abstractmethod
@@ -20,24 +19,22 @@ class FaceRecognizer(ABC):
          """Recognize valid user"""
          
 class PVLRecognizer(FaceRecognizer):
-    def init(self, path):
+    def __init__(self, dllPath, dbPath):
         try:
-          self.PVL = C.cdll.LoadLibrary(path)
+          self.PVL = C.cdll.LoadLibrary(dllPath)
+          p = C.create_string_buffer(bytes(dbPath.encode()))
+          self.PVL.SetDB.argtypes = [C.c_char_p]
+          self.PVL.SetDB(p)
         except OSError:
-          print("Can`t load dll")
-          return False
-        else:
-          return True
-      
-    def XMLPath(self, path):
-        p = C.create_string_buffer(bytes(path.encode())) # may be it can be done easier
-        self.PVL.GetPath.argtypes = [C.c_char_p]
-        self.PVL.GetPath(p)
-        
+           raise Exception('Can`t load dll')
+              
     def register(self, img, ID):
-       return self.PVL.Register(img.shape[0],
+        res = self.PVL.Register(img.shape[0],
                     img.shape[1],
                     img.ctypes.data_as(C.POINTER(C.c_ubyte)), ID)
+        if(ID != res):
+           raise Exception('An error occured while register')
+        return True
        
     def recognize(self, img):
          x =  C.c_int(0)
@@ -56,3 +53,6 @@ class PVLRecognizer(FaceRecognizer):
      
     def getUID(self):
         return self.PVL.UnknownID()
+    
+    def getNewID(self):
+        return self.PVL.GetNewID()

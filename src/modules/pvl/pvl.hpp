@@ -11,4 +11,6 @@ extern "C" __declspec(dllexport)
 extern "C" __declspec(dllexport) int Register(int rows, int cols,
                                       unsigned char* imgData, int ID);
 extern "C" __declspec(dllexport) int UnknownID();
-extern "C" __declspec(dllexport) void GetPath(char* path);
+extern "C" __declspec(dllexport) int GetNewID();
+extern "C" __declspec(dllexport) void SetDB(char* path);
+
