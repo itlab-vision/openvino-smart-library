@@ -18,9 +18,18 @@ class IDatabaseFRM(ABC):
     @abstractmethod
     def GetTrainedModel(self, name_model):
         """Get trained model"""
-        
+    
+    @abstractmethod    
     def AddModel(self, model):
         """Add model"""
+        
+    @abstractmethod    
+    def GetNewUserID(self):
+        """Get new user ID"""
+        
+    # @abstractmethod    
+    # def GetNewUserID(self, file):
+        # """Get new user ID"""
         
 class IDatabaseGUI(ABC):
     @abstractmethod
