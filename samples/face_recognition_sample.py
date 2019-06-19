@@ -2,13 +2,14 @@ import sys, os
 import argparse 
 #import numpy as np
 import cv2
-sys.path.append("..\\src\\modules")
+sys.path.append("../src/modules")
 import face_recognizer
 
 class fpsMeasure:
      fpsInterval = 0
      fpsSum = 0
      fps = 0
+
 def build_argparse():
     parser = argparse.ArgumentParser(description='face recognizer sample')
     parser.add_argument('-r', '--recognizer', type = str, default = 'PVL',
@@ -36,12 +37,8 @@ def showText(f, x, y, h, w, name, elapsed = 0):
                           cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 208, 86), 1)
 
      FPS_MEASURE_INTERVAL = 30
-    #  fpsMeasure.fpsInterval = 0
-    #  fpsMeasure.fpsSum = 0
-    #  fpsMeasure.fps = 0
      fpsMeasure.fpsSum += elapsed
      fpsMeasure.fpsInterval = fpsMeasure.fpsInterval + 1
-     print(fpsMeasure.fpsInterval)
      if (fpsMeasure.fpsInterval == FPS_MEASURE_INTERVAL):
           fpsMeasure.fps = 1.0 / fpsMeasure.fpsSum * FPS_MEASURE_INTERVAL
           fpsMeasure.fpsInterval = 0

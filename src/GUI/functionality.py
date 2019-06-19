@@ -19,8 +19,8 @@ import face_recognizer
 import book_recognizer
 sys.path.insert(0, "infrastructure")
 from CSVDatabase import *
-from Data_types.User import *
-from Data_types.Book import *
+from Entities.User import *
+from Entities.Book import *
 
 #Global user ID
 #ID = 0
@@ -32,7 +32,7 @@ dbPath = "infrastructure/database/facesdb.xml"
 brName = "ORB"
 
 #Data base files
-usersTable = "infrastructure/Database/Users/Users.csv"
+usersTable = "infrastructure/Entities/Users/Users.csv"
 
 #Поток для отрисовки видео с вебкамеры
 class Thread(QThread):
@@ -111,16 +111,16 @@ class Thread(QThread):
                                   xm//2 - 120 : xm//2 + 120]
             cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), 
                               (xm//2 + 110, ym//2 + 145), (0, 255, 255))    
-
-            if (self.check == True and resArr):
-                numF = len([f for f in os.listdir('infrastructure/Database/Books/Covers/')
+            numF = len([f for f in os.listdir('infrastructure/Database/Books/Covers/')
                 if os.path.isfile(os.path.join('infrastructure/Database/Books/Covers/', f))]) - 1
                 
-                if (numF != l):
-                    l, desTpl = self.getCovers()
-                    resArr.clear()
-                    for i in range(l):
-                       resArr.append(0)
+            if (numF != l):
+                l, desTpl = self.getCovers()
+                resArr.clear()
+                for i in range(l):
+                    resArr.append(0)
+                    
+            if (self.check == True and resArr):
 
                 recognizeResult = rec.recognize(cropFrame, desTpl, 0.7)
                 out = str(100 * max(resArr) / 400)

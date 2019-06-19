@@ -28,7 +28,7 @@ def NumOfLines(file):
 class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                   IDatabaseFRM, IDatabaseGUI):
     # dbRootDir = 'infrastructure/Database/'
-    dbRootDir = 'Database/'
+    dbRootDir = 'infrastructure/Database/'
     
     def __init__(self):
         self.fBooks = self.dbRootDir + 'Books/Books.csv'
