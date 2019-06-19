@@ -89,39 +89,39 @@ class Thread(QThread):
     def bookRecognition(self):
         rec = book_recognizer.Recognizer()
         rec.create(brName)
-        templ = []
 
-        for i in os.listdir("infrastructure/Database/Books/Covers/"):
-            if (re.fullmatch('\d+.png', i)):
-                templ.append(os.path.join("infrastructure/Database/Books/Covers/", i))
-        
-  
-        cap = cv2.VideoCapture(0)
-        i = 0
-        det = cv2.ORB_create()
-        l = len(templ)
         resArr = []
         desTpl = []
+        cap = cv2.VideoCapture(0)
+        l, desTpl = self.getCovers()
+        print(l)
         _, frame = cap.read()
         ym, xm, _ = frame.shape
+        i = 0
         for i in range(l):
             resArr.append(0)
-    
-        #Список с ключевыми точками шаблонов
-        for t in templ:
-            tpl = cv2.imread(t)
-            tplGray = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
-            _, tmp = det.detectAndCompute(tplGray, None)
-            desTpl.append(tmp)
-        
-        while(True): 
+
+
+        print("book recognition")
+        print(resArr)
+
+        while(True):
             _, frame = cap.read()
             cropFrame = frame[ym//2 - 170 : ym//2 + 170,
                                   xm//2 - 120 : xm//2 + 120]
             cv2.rectangle(frame, (xm//2 - 110, ym//2 - 150), 
-                              (xm//2 + 110, ym//2 + 145), (0, 255, 255))
-            
+                              (xm//2 + 110, ym//2 + 145), (0, 255, 255))    
+
             if (self.check == True and resArr):
+                numF = len([f for f in os.listdir('infrastructure/Database/Books/Covers/')
+                if os.path.isfile(os.path.join('infrastructure/Database/Books/Covers/', f))]) - 1
+                
+                if (numF != l):
+                    l, desTpl = self.getCovers()
+                    resArr.clear()
+                    for i in range(l):
+                       resArr.append(0)
+
                 recognizeResult = rec.recognize(cropFrame, desTpl, 0.7)
                 out = str(100 * max(resArr) / 400)
                 out = out + '%'
@@ -130,7 +130,8 @@ class Thread(QThread):
                 for i in range(l):
                     resArr[i] = resArr[i] + recognizeResult[i]
                 if max(resArr) > 400:
-                    ID = resArr.index(max(resArr))
+                    ID = resArr.index(max(resArr))+1
+                    print(ID)
                     self.returnID.emit(ID)
                     resArr.clear()
                     for i in range(l):
@@ -143,7 +144,23 @@ class Thread(QThread):
             pixmap = QPixmap.fromImage(convertToQtFormat)
             resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
             self.changePixmap.emit(resizeImage)   
-        
+
+    def getCovers(self):
+        templ = []
+        desTpl = []
+        for i in os.listdir("infrastructure/Database/Books/Covers/"):
+           if (re.fullmatch('([^\s]+(\.(?i)(jpg|png|gif|bmp))$)', i)):
+                templ.append(os.path.join("infrastructure/Database/Books/Covers/", i))
+        #Список с ключевыми точками шаблонов
+        det = cv2.ORB_create()
+        for t in templ:
+            tpl = cv2.imread(t)
+            tplGray = cv2.cvtColor(tpl, cv2.COLOR_BGR2GRAY)
+            _, tmp = det.detectAndCompute(tplGray, None)
+            desTpl.append(tmp)
+
+        return [len(templ), desTpl]
+
     #получить newID из основного потока
     def passNewID(self, newID):
         self.newID = newID
@@ -340,12 +357,9 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
             self.GetInfoBB()
         
     def GetBook(self):
-        #self.thread.recognizeBook()
-        #self.labelInfo2.show()
-        userId = 10 # получить id текущего пользователя
-        bookId = 10 # получить id распознанной книги
-        self.CSV.ChangeBookStatus(userId, bookId)
-        print("Book`s status was changed")
+        print("GetBook")
+        self.thread.recognizeBook()
+        self.labelInfo2.show()
         
     @pyqtSlot(QPixmap)
     def setPixmap(self, image):
@@ -358,11 +372,13 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
     @pyqtSlot(int)   
     def getBookID(self, ID):
          self.bookID = ID
+         self.CSV.ChangeBookStatus(self.ID, self.bookID)
+         print("Book`s status was changed")
          self.labelInfo2.hide()
          print(self.bookID)
         
     def AddBook(self):
-        self.bookWin = BookWindow()
+        self.bookWin = BookWindow(self.CSV)
         self.bookWin.show()
         print("AddBook")
     
@@ -474,7 +490,6 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         DateB = BBook[1]
         DateR = BBook[2]
         User = BBook[3]
-        
         #tabel 1 with borrowed books
         self.tableBooks1.setColumnCount(6)
         self.tableBooks1.verticalHeader().hide()
@@ -503,7 +518,7 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
                 self.tableBooks1.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[i[0]]))
         
         self.tableBooks1.resizeColumnsToContents()
-        
+
         #tabel 2 with previously taken books
         self.tableBooks2.setColumnCount(7)
         self.tableBooks2.verticalHeader().hide()
@@ -531,7 +546,7 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
                 self.tableBooks2.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[k[0]]))
                 self.tableBooks2.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(DateR[k[0]]))
                 
-        self.tableBooks2.resizeColumnsToContents()    
+        self.tableBooks2.resizeColumnsToContents()  
         
     @pyqtSlot(QPixmap)
     def setPixmap(self, image):
@@ -548,20 +563,77 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
          print(self.bookID)
     
     def GetBook(self):
-        #self.thread.recognizeBook()
-        #self.labelInfo2.show()
-        userId = 10 # получить id текущего пользователя
-        bookId = 10 # получить id распознанной книг
+        self.thread.recognizeBook()
+        self.labelInfo2.show()
+        userId = 1 # получить id текущего пользователя
+        bookId = 1 # получить id распознанной книг
         self.CSV.ChangeBookStatus(userId, bookId)
         print("Book`s status was changed")
+        self.updateTableBook1()
+        self.updateTableBook2()
         # при нажатии на кнопку "Get book" этот метод срабатывает дважды
+   
+    def updateTableBooks1(self):
+        BBook = CSV.GetBorrowedBooks()
+        Book = BBook[0]
+        DateB = BBook[1]
+        DateR = BBook[2]
+        User = BBook[3]
+        for i in enumerate(DateB):
+            if((DateR[i[0]] == "-1") and (int(User[i[0]].user_id) == self.ID)):
+                c = ", " # строка для разделения авторов
+                rowPosition = self.tableBooks1.rowCount()
+                self.tableBooks1.insertRow(rowPosition)
+                self.tableBooks1.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[i[0]].book_id))
+                authorsStr = "" # строка для размещения в ней ФИО авторов
+                for j in enumerate(Book[i[0]].authors):
+                    if (j[0] == len(Book[i[0]].authors) - 1):
+                        c = ''
+                    authorsStr += (Book[i[0]].authors[j[0]].first_name + ' ' +
+                                Book[i[0]].authors[j[0]].last_name + ' ' +
+                                Book[i[0]].authors[j[0]].middle_name + c)
+                self.tableBooks1.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
+                self.tableBooks1.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[i[0]].title))
+                self.tableBooks1.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[i[0]].publisher))
+                self.tableBooks1.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[i[0]].year))
+                self.tableBooks1.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[i[0]]))
         
+        self.tableBooks1.resizeColumnsToContents()
+
+    def updateTableBooks2(self):
+        BBook = CSV.GetBorrowedBooks()
+        Book = BBook[0]
+        DateB = BBook[1]
+        DateR = BBook[2]
+        User = BBook[3]
+        for k in enumerate(DateB):
+            if((DateR[k[0]] != "-1") and (int(User[k[0]].user_id) == self.ID)):
+                c = ", " # строка для разделения авторов
+                rowPosition = self.tableBooks2.rowCount()
+                self.tableBooks2.insertRow(rowPosition)
+                self.tableBooks2.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(Book[k[0]].book_id))
+                authorsStr = "" # строка для размещения в ней ФИО авторов
+                for t in enumerate(Book[k[0]].authors):
+                    if (t[0] == len(Book[k[0]].authors) - 1):
+                        c = ''
+                    authorsStr += (Book[k[0]].authors[t[0]].first_name + ' ' +
+                                Book[k[0]].authors[t[0]].last_name + ' ' +
+                                Book[k[0]].authors[t[0]].middle_name + c)
+                self.tableBooks2.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(authorsStr))
+                self.tableBooks2.setItem(rowPosition, 2, QtWidgets.QTableWidgetItem(Book[k[0]].title))
+                self.tableBooks2.setItem(rowPosition, 3, QtWidgets.QTableWidgetItem(Book[k[0]].publisher))
+                self.tableBooks2.setItem(rowPosition, 4, QtWidgets.QTableWidgetItem(Book[k[0]].year))
+                self.tableBooks2.setItem(rowPosition, 5, QtWidgets.QTableWidgetItem(DateB[k[0]]))
+                self.tableBooks2.setItem(rowPosition, 6, QtWidgets.QTableWidgetItem(DateR[k[0]]))
+                
+        self.tableBooks2.resizeColumnsToContents()    
+
     def closeEvent(self, event):
         cap = cv2.VideoCapture(0)
         cap.release()
         self.thread.stop()
         print("thread stopped")
-        event.accept()   
+        event.accept() 
         
 class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
     def __init__(self, CSV):
