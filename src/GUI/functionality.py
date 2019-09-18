@@ -129,7 +129,7 @@ class Thread(QThread):
                                                           1, (0, 255, 255), 2)
                 for i in range(l):
                     resArr[i] = resArr[i] + recognizeResult[i]
-                if max(resArr) > 400:
+                if max(resArr) > 200:
                     ID = resArr.index(max(resArr))+1
                     print(ID)
                     self.returnID.emit(ID)
@@ -374,6 +374,7 @@ class AdminWindow(QtWidgets.QMainWindow, AdminWin.Ui_MainWindow):
          self.bookID = ID
          self.CSV.ChangeBookStatus(self.ID, self.bookID)
          print("Book`s status was changed")
+         self.GetInfoBB()
          self.labelInfo2.hide()
          print(self.bookID)
         
@@ -558,23 +559,22 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         
     @pyqtSlot(int)   
     def getBookID(self, ID):
-         self.bookID = ID
-         self.labelInfo2.hide()
-         print(self.bookID)
+        self.bookID = ID
+        self.CSV.ChangeBookStatus(self.ID, self.bookID)
+        print("Book`s status was changed")
+        self.updateTableBooks1()
+        self.updateTableBooks2()
+        self.labelInfo2.hide()
+        print(self.bookID)
     
     def GetBook(self):
         self.thread.recognizeBook()
         self.labelInfo2.show()
-        userId = 1 # получить id текущего пользователя
-        bookId = 1 # получить id распознанной книг
-        self.CSV.ChangeBookStatus(userId, bookId)
-        print("Book`s status was changed")
-        self.updateTableBook1()
-        self.updateTableBook2()
-        # при нажатии на кнопку "Get book" этот метод срабатывает дважды
-   
+
     def updateTableBooks1(self):
-        BBook = CSV.GetBorrowedBooks()
+        self.tableBooks1.setRowCount(0)
+        self.tableBooks1.setColumnCount(6)
+        BBook = self.CSV.GetBorrowedBooks()
         Book = BBook[0]
         DateB = BBook[1]
         DateR = BBook[2]
@@ -601,7 +601,9 @@ class ReaderWindow(QtWidgets.QMainWindow, ReaderWin.Ui_MainWindow):
         self.tableBooks1.resizeColumnsToContents()
 
     def updateTableBooks2(self):
-        BBook = CSV.GetBorrowedBooks()
+        self.tableBooks2.setRowCount(0)
+        self.tableBooks2.setColumnCount(7)
+        BBook = self.CSV.GetBorrowedBooks()
         Book = BBook[0]
         DateB = BBook[1]
         DateR = BBook[2]
@@ -663,7 +665,7 @@ class BookWindow(QtWidgets.QMainWindow, BookWin.Ui_MainWindow):
             if(flag == 4):
                 flag = 0
                 if(c == ' '):
-                    continue;
+                    continue
             if(c == ' '):
                 flag = flag + 1
                 continue

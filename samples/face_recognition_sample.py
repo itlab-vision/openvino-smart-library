@@ -1,6 +1,6 @@
 import sys, os
 import argparse 
-#import numpy as np
+import numpy as np
 import cv2
 sys.path.append("../src/modules")
 import face_recognizer

@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file 'ReaderWin.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.2
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -58,7 +60,7 @@ class Ui_MainWindow(object):
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.tableBooks1 = QtWidgets.QTableWidget(self.tab)
-        self.tableBooks1.setGeometry(QtCore.QRect(0, 0, 811, 601))
+        self.tableBooks1.setGeometry(QtCore.QRect(0, 0, 651, 611))
         self.tableBooks1.setObjectName("tableBooks1")
         self.tableBooks1.setColumnCount(0)
         self.tableBooks1.setRowCount(0)
@@ -77,7 +79,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -88,4 +90,3 @@ class Ui_MainWindow(object):
         self.labelInfo2.setText(_translate("MainWindow", "Place the book in the selected area"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Borrowed books"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Books taken before"))
-
