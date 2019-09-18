@@ -137,6 +137,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         #
         writer = csv.DictWriter(fileUsersW, fieldnames = self.fieldnamesUser,
                                 delimiter = ',')
+        user.user_id = NumOfLines(path + "Users/Users.csv") # id нового пользователя = числу строк в файле Users.csv
         writer.writerow({self.dUser['user_id']: user.user_id,
                          self.dUser['phone']: user.phone,
                          self.dUser['first_name']: user.first_name,
@@ -145,6 +146,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         #
         fileUsersR.close()
         fileUsersW.close()
+        return user.user_id
     
     def GetUser(self, user_id):
         # РАЗОБРАТЬСЯ С ENUMERATE!
