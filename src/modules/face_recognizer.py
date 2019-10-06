@@ -1,5 +1,7 @@
 import numpy as np
+import cv2 as cv
 import ctypes as C
+
 from abc import ABC, abstractmethod
 
 class FaceRecognizer(ABC):
@@ -17,7 +19,36 @@ class FaceRecognizer(ABC):
      @abstractmethod
      def recognize(self, img):
          """Recognize valid user"""
-         
+
+class DNNFaceDetector():
+     def __init__(self, modelPath, configPath, inputWidth, inputHeight, mean, swapRB, scale):
+        self.model = modelPath
+        self.config = configPath
+        self.width = inputWidth
+        self.height = inputHeight
+        self.mean = mean
+        self.swapRB = swapRB
+        self.scale = scale
+        backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
+        targetId = cv.dnn.DNN_TARGET_CPU
+        self.net = cv.dnn.readNet(self.model, self.config)
+        self.net.setPreferableBackend(backendId)
+        self.net.setPreferableTarget(targetId)
+
+     def detect(self, image):
+        ddepth = cv.CV_32F
+        resized = cv.resize(image, (self.width, self.height))
+        blob = cv.dnn.blobFromImage(image, self.scale, (self.width, self.height),
+                  self.mean, self.swapRB, False, ddepth)
+        self.net.setInput(blob)
+        outputBlobs	= self.net.forward()
+        print(outputBlobs)
+
+
+
+
+
+
 class PVLRecognizer(FaceRecognizer):
     def __init__(self, dllPath, dbPath):
         try:
