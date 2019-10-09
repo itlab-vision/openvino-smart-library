@@ -11,43 +11,67 @@ class FaceRecognizer(ABC):
             return PVLRecognizer(args["dll"], args["db"])
          else:
             raise Exception('Error: wrong recognizer name')
-           
+
      @abstractmethod
      def register(self, img, ID):
          """Register new reader"""
-         
+
      @abstractmethod
      def recognize(self, img):
          """Recognize valid user"""
 
-class DNNFaceDetector():
-     def __init__(self, modelPath, configPath, inputWidth, inputHeight, mean, swapRB, scale):
+class FaceDetector(ABC):
+     @staticmethod
+     def create(args): #Args - dict("name", "dll", "db")
+         if args["name"] == 'DNNfd':
+            return DNNDetector(args["model"], args["config"], args["width"], args["height"],args["threshold"])
+         else:
+            raise Exception('Error: wrong detector name')
+
+     @abstractmethod
+     def detect(self, img,  threshold):
+         """Detect faces on image"""
+
+class DNNDetector(FaceDetector):
+     def __init__(self, modelPath, configPath, width, height, threshold):
         self.model = modelPath
         self.config = configPath
-        self.width = inputWidth
-        self.height = inputHeight
-        self.mean = mean
-        self.swapRB = swapRB
-        self.scale = scale
+        self.width = width
+        self.height = height
+        self.threshold = threshold
         backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
         targetId = cv.dnn.DNN_TARGET_CPU
         self.net = cv.dnn.readNet(self.model, self.config)
         self.net.setPreferableBackend(backendId)
         self.net.setPreferableTarget(targetId)
 
-     def detect(self, image):
-        ddepth = cv.CV_32F
-        resized = cv.resize(image, (self.width, self.height))
-        blob = cv.dnn.blobFromImage(image, self.scale, (self.width, self.height),
-                  self.mean, self.swapRB, False, ddepth)
+     def detect(self, img):
+        blob = cv.dnn.blobFromImage(img,  size=(self.width, self.height))
         self.net.setInput(blob)
-        outputBlobs	= self.net.forward()
-        print(outputBlobs)
+        out	= self.net.forward()
+        print(out)
+        faces = []
+        for detection in out.reshape(-1, 7):
+            confidence = float(detection[2])
+            if confidence >  self.threshold:
+                xmin = int(detection[3] *  img.shape[1])
+                ymin = int(detection[4] *  img.shape[0])
+                xmax = int(detection[5] *  img.shape[1])
+                ymax = int(detection[6] *  img.shape[0])
+                faces.append(((xmin, ymin), (xmax, ymax)))
+        return faces       
 
+# class DNNRecognizer(FaceRecognizer):
+#     def __init__(self, dllPath, dbPath):
+#         try:
+#         except OSError:
+#            raise Exception('Can`t load dll')
 
+#     def register(self, img, ID):
+#         return True
 
-
-
+#     def recognize(self, img):
+#         return True
 
 class PVLRecognizer(FaceRecognizer):
     def __init__(self, dllPath, dbPath):
@@ -58,7 +82,7 @@ class PVLRecognizer(FaceRecognizer):
           self.PVL.SetDB(p)
         except OSError:
            raise Exception('Can`t load dll')
-              
+
     def register(self, img, ID):
         res = self.PVL.Register(img.shape[0],
                     img.shape[1],
@@ -66,7 +90,7 @@ class PVLRecognizer(FaceRecognizer):
         if(ID != res):
            raise Exception('An error occured while register')
         return True
-       
+
     def recognize(self, img):
          x =  C.c_int(0)
          xptr = C.pointer(x)
@@ -78,12 +102,12 @@ class PVLRecognizer(FaceRecognizer):
          hptr = C.pointer(h)
          ID = self.PVL.Recognize(img.shape[0],
                             img.shape[1],
-                            img.ctypes.data_as(C.POINTER(C.c_ubyte)), 
+                            img.ctypes.data_as(C.POINTER(C.c_ubyte)),
                             xptr, yptr, wptr, hptr)
-         return (ID, (x.value, y.value, w.value, h.value)) 
-     
+         return (ID, (x.value, y.value, w.value, h.value))
+
     def getUID(self):
         return self.PVL.UnknownID()
-    
+
     def getNewID(self):
         return self.PVL.GetNewID()
