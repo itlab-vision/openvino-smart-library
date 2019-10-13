@@ -8,7 +8,7 @@ import face_recognizer
 
 # args = dict(name = '', model = '' , config= '', witdth = 0, height = 0, threshold = 0.5)
 args = dict(name = 'DNNfd', model = "face-detection-retail-0004.bin" , config = "face-detection-retail-0004.xml", width = 672, height = 384, threshold = 0.5)
-det = face_recognizer.rec = face_recognizer.FaceDetector.create(args)
+det = face_recognizer.FaceDetector.create(args)
 
 cap = cv.VideoCapture(0)
 while(True): 
