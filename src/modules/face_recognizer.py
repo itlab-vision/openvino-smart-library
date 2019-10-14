@@ -68,10 +68,20 @@ class DNNLandmarks(ABC):
             landmarks.append((out[2*i],out[2*i+1]))
         return landmarks
 
-    def align(self, img, desiredLandmarkPoints):
-        landmarks = self.findLandmarks(img)
-        warp = getAffineTransform(landmarks, desiredLandmarkPoints)
-        warp_dst = warpAffine( src, warp_dst, warp_mat, warp_dst.size() );
+    def align(self, img, currPoints, desiredPoints):
+        dy = currPoints[1][1] - currPoints[0][1]
+        dx = currPoints[1][0] - currPoints[0][0]
+        angle = np.arctan2(dy, dx) * 180 / np.pi
+        # center of face_frame
+        center = (img.shape[0] // 2, img.shape[1] // 2)
+        h, w, c = img.shape
+        # grab the rotation matrix for rotating and scaling the face
+        M = cv.getRotationMatrix2D(center, angle, scale=1.0)
+        aligned_face = cv.warpAffine(img, M, (w, h))
+
+        warp = cv.getAffineTransform(currPoints, desiredPoints)
+        warp_dst = cv.warpAffine(aligned_face, warp, (img.shape[1], img.shape[0]))
+        return  aligned_face
 
 class DNNDetector(FaceDetector):
     def __init__(self, modelPath, configPath, width, height, threshold):
