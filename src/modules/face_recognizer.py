@@ -7,9 +7,11 @@ from abc import ABC, abstractmethod
 class FaceRecognizer(ABC):
      @staticmethod
      def create(args): #Args - dict("name", "dll", "db")
-         if args["name"] == 'PVL':
+        if args["name"] == 'PVL':
             return PVLRecognizer(args["dll"], args["db"])
-         else:
+        elif args["name"] == 'DNN':
+            return DNNRecognizer(args["model"], args["config"], args["width"], args["height"], args["threshold"])
+        else:
             raise Exception('Error: wrong recognizer name')
 
      @abstractmethod
@@ -78,10 +80,16 @@ class DNNLandmarks(ABC):
         # grab the rotation matrix for rotating and scaling the face
         M = cv.getRotationMatrix2D(center, angle, scale=1.0)
         aligned_face = cv.warpAffine(img, M, (w, h))
-
-        warp = cv.getAffineTransform(currPoints, desiredPoints)
-        warp_dst = cv.warpAffine(aligned_face, warp, (img.shape[1], img.shape[0]))
-        return  aligned_face
+        # landmarks = self.findLandmarks(aligned_face)
+        # pts1 = np.float32([ [landmarks[0][0], landmarks[0][1]], [landmarks[1][0], landmarks[1][1]] ,[landmarks[2][0], landmarks[2][1]] ])
+        # # print("curr")
+        # print(currPoints)
+        # newPoints = cv.warpAffine(currPoints, M, (currPoints.shape[1], currPoints.shape[0]))
+        # print("new")
+        # print(newPoints)
+        # warp = cv.getAffineTransform(pts1, desiredPoints)
+        # warp_dst = cv.warpAffine(aligned_face, warp, (aligned_face.shape[1], aligned_face.shape[0]))
+        return aligned_face
 
 class DNNDetector(FaceDetector):
     def __init__(self, modelPath, configPath, width, height, threshold):
@@ -111,15 +119,42 @@ class DNNDetector(FaceDetector):
                 faces.append(((xmin, ymin), (xmax, ymax)))
         return faces
 
-# class DNNRecognizer(FaceRecognizer):
-#     def __init__(self, dllPath, dbPath):
+class DNNRecognizer(FaceRecognizer):
+    def __init__(self, modelPath, configPath, width, height, threshold):
+        args = dict(name = 'DNNLandmarks', model = "landmarks-regression-retail-0009.bin" , config = "landmarks-regression-retail-0009.xml", width = 48, height = 48)
+        self.fl = FaceLandmarks.create(args)
+        args = dict(name = 'DNNfd', model = "face-detection-retail-0004.bin" , config = "face-detection-retail-0004.xml", width = 672, height = 384, threshold = 0.9)
+        self.det = FaceDetector.create(args)
+
+        self.model = modelPath
+        self.config = configPath
+        self.width = width
+        self.height = height
+        self.threshold = threshold
+        backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
+        targetId = cv.dnn.DNN_TARGET_CPU
+        self.net = cv.dnn.readNet(self.model, self.config)
+        self.net.setPreferableBackend(backendId)
+        self.net.setPreferableTarget(targetId)
 
 
-#     def register(self, img, ID):
-#         return True
+    def register(self, img, ID):
+        faces = self.det.detect(img)
+        for face in faces:
+            roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
+            landmarks = self.fl.findLandmarks(roi)
+            pts1 = np.float32([ [landmarks[0][0], landmarks[0][1]], [landmarks[1][0], landmarks[1][1]] ,[landmarks[2][0], landmarks[2][1]] ])
+            pts2 = np.float32([[0.31556875000000000, 0.4615741071428571], [0.68262291666666670, 0.4615741071428571], [0.50026249999999990, 0.6405053571428571]])
+            alignFace = self.fl.align(roi, pts1, pts2)
+        blob = cv.dnn.blobFromImage(alignFace,  size=(self.width, self.height))
+        self.net.setInput(blob)
+        out	= self.net.forward()
+        out = out.flatten()
+        return out
 
-#     def recognize(self, img):
-#         return True
+    def recognize(self, img):
+        faces = self.det.detect(img)
+        return True
 
 class PVLRecognizer(FaceRecognizer):
     def __init__(self, dllPath, dbPath):

@@ -15,7 +15,6 @@ pts2 = np.float32([[0.31556875000000000, 0.4615741071428571], [0.682622916666666
 # args = dict(name = '', model = '' , config= '', witdth = 0, height = 0, threshold = 0.5)
 args = dict(name = 'DNNLandmarks', model = "landmarks-regression-retail-0009.bin" , config = "landmarks-regression-retail-0009.xml", width = 48, height = 48)
 fl = face_recognizer.FaceLandmarks.create(args)
-
 args = dict(name = 'DNNfd', model = "face-detection-retail-0004.bin" , config = "face-detection-retail-0004.xml", width = 672, height = 384, threshold = 0.9)
 det = face_recognizer.FaceDetector.create(args)
 
