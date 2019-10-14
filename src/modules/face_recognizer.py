@@ -7,9 +7,7 @@ from abc import ABC, abstractmethod
 class FaceRecognizer(ABC):
      @staticmethod
      def create(args): #Args - dict("name", "dll", "db")
-        if args["name"] == 'PVL':
-            return PVLRecognizer(args["dll"], args["db"])
-        elif args["name"] == 'DNN':
+        if args["name"] == 'DNN':
             return DNNRecognizer(args["model"], args["config"], args["width"], args["height"], args["threshold"])
         else:
             raise Exception('Error: wrong recognizer name')
@@ -156,41 +154,3 @@ class DNNRecognizer(FaceRecognizer):
         faces = self.det.detect(img)
         return True
 
-class PVLRecognizer(FaceRecognizer):
-    def __init__(self, dllPath, dbPath):
-        try:
-          self.PVL = C.cdll.LoadLibrary(dllPath)
-          p = C.create_string_buffer(bytes(dbPath.encode()))
-          self.PVL.SetDB.argtypes = [C.c_char_p]
-          self.PVL.SetDB(p)
-        except OSError:
-           raise Exception('Can`t load dll')
-
-    def register(self, img, ID):
-        res = self.PVL.Register(img.shape[0],
-                    img.shape[1],
-                    img.ctypes.data_as(C.POINTER(C.c_ubyte)), ID)
-        if(ID != res):
-           raise Exception('An error occured while register')
-        return True
-
-    def recognize(self, img):
-         x =  C.c_int(0)
-         xptr = C.pointer(x)
-         y = C.c_int(0)
-         yptr = C.pointer(y)
-         w = C.c_int(0)
-         wptr = C.pointer(w)
-         h = C.c_int(0)
-         hptr = C.pointer(h)
-         ID = self.PVL.Recognize(img.shape[0],
-                            img.shape[1],
-                            img.ctypes.data_as(C.POINTER(C.c_ubyte)),
-                            xptr, yptr, wptr, hptr)
-         return (ID, (x.value, y.value, w.value, h.value))
-
-    def getUID(self):
-        return self.PVL.UnknownID()
-
-    def getNewID(self):
-        return self.PVL.GetNewID()
