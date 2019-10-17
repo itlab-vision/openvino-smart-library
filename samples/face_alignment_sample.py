@@ -25,13 +25,15 @@ landmarks = []
 while(True): 
     _, img = cap.read()
     faces = det.detect(img)
-    alignFace = np.zeros(img.shape, np.uint8)
-    for face in faces:
+    alignFaces = [None]*len(faces)
+    for i, face in enumerate(faces):
         roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
         landmarks = fl.findLandmarks(roi)
-        alignFace = fl.align(roi, landmarks, refLandmarks)
-    cv.imshow("window1", alignFace)
-    cv.imshow("window2", img)
+        alignFaces[i] = fl.align(roi, landmarks, refLandmarks)
+
+    for i, alignFace in enumerate(alignFaces):
+        cv.imshow("Align Face"+ str(i), alignFace)
+    cv.imshow("Sample", img)
     ch = cv.waitKey(5)
     if ch & 0xFF == ord('q'):
         break

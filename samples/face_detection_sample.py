@@ -16,7 +16,7 @@ while(True):
     faces = det.detect(f)
     for face in faces:
         cv.rectangle(f, face[0], face[1], color=(0, 255, 0))
-    cv.imshow("window", f)
+    cv.imshow("window", f) #cv.transpose(f))
     ch = cv.waitKey(5)
     if ch & 0xFF == ord('q'):
         break

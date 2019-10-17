@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import cv2 as cv
 import ctypes as C
@@ -72,8 +73,33 @@ class DNNLandmarks(ABC):
 
         return landmarks
 
+    def getTransform(self, src, dst):
+        col_mean_src = cv.reduce(src, 0, cv.REDUCE_AVG)
+        for row in src:
+            row-=col_mean_src[0]
+
+        col_mean_dst = cv.reduce(dst, 0, cv.REDUCE_AVG)
+        for row in dst:
+            row-=col_mean_dst[0]
+
+        mean, dev_src = cv.meanStdDev(src)
+        dev_src[0,0] = max(sys.float_info.epsilon, dev_src[0])
+        src /= dev_src[0,0]
+     
+        mean, dev_dst = cv.meanStdDev(dst)
+        dev_dst[0,0] = max(sys.float_info.epsilon, dev_dst[0])
+        dst /= dev_dst[0,0] 
+        
+        w, u, vt = cv.SVDecomp(np.dot(cv.transpose(src), dst))
+        r = cv.transpose(np.dot(u,vt))
+        m = np.empty((2, 3), dtype=np.float32)
+        m[0:2,0:2] = np.dot(r , (dev_dst[0,0] / dev_src[0,0]))
+        m[0:2,2:3] = cv.transpose(col_mean_dst) - np.dot(m[0:2,0:2], cv.transpose(col_mean_src))
+        return m
+
+
     def align(self, img, landmarks, refLandmarks):
-        aligned_face= np.copy(img)
+        aligned_face = np.copy(img)
         refLandmarksCopy =  np.copy(refLandmarks)
         for  point, refPoint in zip(landmarks, refLandmarksCopy):
            point[1] = int(point[1]*img.shape[0])
@@ -81,9 +107,10 @@ class DNNLandmarks(ABC):
            refPoint[1] = int(refPoint[1]*img.shape[0])
            refPoint[0] = int(refPoint[0]*img.shape[1])
 
-        print(landmarks)
-        print(landmarks[0:3,:])
-        print(landmarks[0:5:2,:])
+        m = self.getTransform(landmarks, refLandmarksCopy)
+        # print(landmarks)
+        # print(landmarks[0:3,:])
+        # print(landmarks[0:5:2,:])
 
         l = np.empty((3, 2), dtype=np.float32)
         rl= np.empty((3, 2), dtype=np.float32)
@@ -94,7 +121,11 @@ class DNNLandmarks(ABC):
         rl[1] = refLandmarksCopy[2]
         rl[2] = refLandmarksCopy[4]
         M = cv.getAffineTransform(l, rl)  # landmarks[0:5:2,:], refLandmarksCopy[0:3,:])
-        aligned_face = cv.warpAffine(aligned_face, M, (aligned_face.shape[1], aligned_face.shape[0]))
+        # print("m")
+        # print(m)
+        # print("M")
+        # print(M)
+        aligned_face = cv.warpAffine(aligned_face, m, (aligned_face.shape[1], aligned_face.shape[0]))
         return aligned_face
        
 class DNNDetector(FaceDetector):
