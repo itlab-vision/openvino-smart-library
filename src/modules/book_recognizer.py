@@ -1,5 +1,8 @@
 import cv2
+import numpy as np
+import pyzbar.pyzbar as pyzbar
 from abc import ABC, abstractmethod
+
 
 class BookRecognizer(ABC):
     @abstractmethod
@@ -48,3 +51,53 @@ class Recognizer(BookRecognizer):
             arr.append(len(good))
         
         return arr
+
+
+class Recognizer2(BookRecognizer):
+    def create(self, detName):
+        pass
+
+    @staticmethod
+    def recognize(frame):
+        # Find barcodes and QR codes
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        decodedObjects = pyzbar.decode(gray)
+
+        # Print results
+        ans = ""
+        for obj in decodedObjects:
+            if obj.type == 'QRCODE':
+                ans = obj.data.decode('utf-8')
+            print('Type : ', obj.type)
+            print('Data : ', obj.data, '\n')
+
+        # Return decode information
+        return ans
+
+    @staticmethod
+    def display(frame):
+        # Find objects
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        decodedObjects = pyzbar.decode(gray)
+
+        # Loop over all decoded objects
+        for decodedObject in decodedObjects:
+            points = decodedObject.polygon
+
+            # If the points do not form a quad, find convex hull
+            if len(points) > 4:
+                hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
+                hull = list(map(tuple, np.squeeze(hull)))
+            else:
+                hull = points
+
+            # Number of points in the convex hull
+            n = len(hull)
+
+            # Draw the convext hull
+            for j in range(0, n):
+                cv2.line(frame, hull[j], hull[(j + 1) % n], (255, 0, 0), 3)
+
+        # Display results
+        cv2.imshow("Results", frame)
+        cv2.waitKey(0)
