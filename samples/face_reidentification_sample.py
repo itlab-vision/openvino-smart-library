@@ -35,12 +35,8 @@ def build_argparse():
                           dest = 'lmWidth', help = 'Image width to resize')
     parser.add_argument('-h_lm', type = int, default = '48',
                           dest = 'lmHeight', help = 'Image height to resize' ) 
-    parser.add_argument('-i', type = str,
-                        dest = 'image', help = 'Image source')
-    parser.add_argument('-v', type = str,
-                        dest = 'video', help = 'Video source')
-    parser.add_argument('-web', type = int, default = 0, 
-                        dest = 'webcam', help = 'Webcam source')
+    parser.add_argument('-i', type = str, default='web',
+                        dest = 'image', help = 'Source of images. Specify path to video, or pass <web> to open web-camera')
     args = parser.parse_args()
     return args
 
@@ -78,39 +74,43 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         rdArgs ['lmWidth'] = args.lmWidth
     if (args.lmWidth != None):
         rdArgs ['lmHeight'] = args.lmHeight
+    if (args.image != None): 
+        src = args.image
+        fileName, fileExtension = os.path.splitext(src)
 
-rec = face_recognizer.FaceRecognizer.create(rdArgs)
+    rec = face_recognizer.FaceRecognizer.create(rdArgs)
+    bd = np.empty((0, 256), dtype=np.float32)
 
-bd = np.empty((0, 256), dtype=np.float32)
+    if src == 'web' or fileExtension in ('.mkv', '.mp4'):
+        src = 0 if src == 'web' else src
+        cap = cv.VideoCapture(src)
+        identified = False
+        while(True):
+            _, img = cap.read()
+            ch = cv.waitKey(5)
+            faces, out = rec.recognize(img, bd)
+            if ch & 0xFF == ord('r') and not identified:
 
-cap = cv.VideoCapture(0)
-identified = False
-while(True):
-    _, img = cap.read()
-    ch = cv.waitKey(5)
-    faces, out = rec.recognize(img, bd)
-    if ch & 0xFF == ord('r') and not identified:
+                bd = np.append(bd, [rec.register(img)], axis=0)
+                cv.putText(img, "You are user #" + str(bd.shape[0]),
+                        (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, color=(0, 255, 0))
+                cv.imshow("window",  img)
+                cv.waitKey(1000)
+                
+            for face in faces:
+                if len(faces) > 1:
+                    cv.putText(img, "No more than one person at a time",
+                        (0,50), cv.FONT_HERSHEY_SIMPLEX, 1, color=(0, 255, 0))
 
-        bd = np.append(bd, [rec.register(img)], axis=0)
-        cv.putText(img, "You are user #" + str(bd.shape[0]),
-                (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, color=(0, 255, 0))
-        cv.imshow("window",  img)
-        cv.waitKey(1000)
-        
-    for face in faces:
-        if len(faces) > 1:
-             cv.putText(img, "No more than one person at a time",
-                (0,50), cv.FONT_HERSHEY_SIMPLEX, 1, color=(0, 255, 0))
+                if np.amax(out) > rec.threshold:
+                    identified = True
+                    cv.putText(img, "User #" + str(np.argmax(out)+1),
+                        face[0], cv.FONT_HERSHEY_SIMPLEX, 1, color=(0, 255, 0))
+                else:
+                    identified = False
+                cv.rectangle(img, face[0], face[1], color=(0, 255, 0))
 
-        if np.amax(out) > rec.threshold:
-            identified = True
-            cv.putText(img, "User #" + str(np.argmax(out)+1),
-                face[0], cv.FONT_HERSHEY_SIMPLEX, 1, color=(0, 255, 0))
-        else:
-            identified = False
-        cv.rectangle(img, face[0], face[1], color=(0, 255, 0))
-
-    cv.imshow("window",  img)
-    if ch & 0xFF == ord('q'):
-        break
-cap.release()
+            cv.imshow("window",  img)
+            if ch & 0xFF == ord('q'):
+                break
+        cap.release()

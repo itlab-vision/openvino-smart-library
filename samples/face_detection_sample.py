@@ -18,12 +18,8 @@ def build_argparse():
                           dest = 'height', help = 'Image height to resize' ) 
     parser.add_argument('-t_fd', type = float, default = '0.9',
                           dest = 'threshold', help = 'Probability threshold for face fdections.' ) 
-    parser.add_argument('-i', type = str,
-                        dest = 'image', help = 'Image source')
-    parser.add_argument('-v', type = str,
-                        dest = 'video', help = 'Video source')
-    parser.add_argument('-web', type = int, default = 0, 
-                        dest = 'webcam', help = 'Webcam source')
+    parser.add_argument('-i', type = str, default='web',
+                        dest = 'image', help = 'Source of images. Specify path to image or video, or pass <web> to open web-camera')
     args = parser.parse_args()
     return args
 
@@ -41,17 +37,31 @@ if (args.detector != None):
         fdArgs ['height'] = args.height
     if (args.threshold != None):
         fdArgs ['threshold'] = args.threshold
-        
+    
+    if (args.image != None): 
+        src = args.image
+        fileName, fileExtension = os.path.splitext(src)
+
     det = face_recognizer.FaceDetector.create(fdArgs)
-    print(fdArgs)
-    cap = cv.VideoCapture(0)
-    while(True): 
-        _, f = cap.read()
-        faces = det.detect(f)
+    if src == 'web' or fileExtension in ('.mkv', '.mp4'):
+        src = 0 if src == 'web' else src
+        cap = cv.VideoCapture(src)
+        while(True): 
+            _, img = cap.read()
+            faces = det.detect(img)
+            for face in faces:
+                cv.rectangle(img, face[0], face[1], color=(0, 255, 0))
+            cv.imshow('Sample', img) 
+            ch = cv.waitKey(5)
+            if ch & 0xFF == ord('q'):
+                break
+        cap.release()
+    elif fileExtension in ('.png', '.jpg','.jpeg', '.bmp'):
+        img = cv.imread(src)
+        faces = det.detect(img)
         for face in faces:
-            cv.rectangle(f, face[0], face[1], color=(0, 255, 0))
-        cv.imshow('Sample', f) 
-        ch = cv.waitKey(5)
-        if ch & 0xFF == ord('q'):
-            break
-    cap.release()
+            cv.rectangle(img, face[0], face[1], color=(0, 255, 0))
+        cv.imshow('Sample', img)
+        cv.waitKey(0) 
+    else:
+        print("Wrong source of image")

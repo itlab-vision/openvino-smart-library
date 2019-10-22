@@ -25,12 +25,8 @@ def build_argparse():
                           dest = 'lmWidth', help = 'Image width to resize')
     parser.add_argument('-h_lm', type = int, default = '48',
                           dest = 'lmHeight', help = 'Image height to resize' ) 
-    parser.add_argument('-i', type = str,
-                        dest = 'image', help = 'Image source')
-    parser.add_argument('-v', type = str,
-                        dest = 'video', help = 'Video source')
-    parser.add_argument('-web', type = int, default = 0, 
-                        dest = 'webcam', help = 'Webcam source')
+    parser.add_argument('-i', type = str, default='web',
+                        dest = 'image', help = 'Source of images. Specify path to image or video,  or pass <web> to open web-camera. ')
     args = parser.parse_args()
     return args
 
@@ -61,31 +57,52 @@ if (args.fdDet != None and args.lmDet != None):
     if (args.lmWidth != None):
         lmArgs ['height'] = args.lmHeight
 
+    if (args.image != None): 
+        src = args.image
+        fileName, fileExtension = os.path.splitext(src)
 
+    det = face_recognizer.FaceDetector.create(fdArgs)
+    fl = face_recognizer.FaceLandmarks.create(lmArgs)
 
-det = face_recognizer.FaceDetector.create(fdArgs)
-fl = face_recognizer.FaceLandmarks.create(lmArgs)
+    if src == 'web' or fileExtension in ('.mkv', '.mp4'):
+        src = 0 if src == 'web' else src
+        cap = cv.VideoCapture(src)
+        landmarks = []
+        while(True): 
+            _, img = cap.read()
+            faces = det.detect(img)
+            if len(faces) > 1:
+                cv.putText(img, "No more than one person at a time",
+                        (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, color=(0, 255, 0))
 
-cap = cv.VideoCapture(0)
-landmarks = []
-while(True): 
-    _, img = cap.read()
-    faces = det.detect(img)
-    if len(faces) > 1:
-            cv.putText(img, "No more than one person at a time",
-                (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, color=(0, 255, 0))
-    for face in faces:
-        roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
-        landmarks = fl.findLandmarks(roi)
-        for point in landmarks:
-            y = int(point[1]*roi.shape[0])
-            x = int(point[0]*roi.shape[1])
-
-            cv.circle(roi, (x,y) , 3, (219,184,121), -1)
-        alignFace = fl.align(roi, landmarks, face_recognizer.refLandmarks)
-    cv.imshow('Align Face', alignFace)
-    cv.imshow('Sample', img)
-    ch = cv.waitKey(5)
-    if ch & 0xFF == ord('q'):
-        break
-cap.release()
+            for face in faces:
+                roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
+                landmarks = fl.findLandmarks(roi)
+                for point in landmarks:
+                    y = int(point[1]*roi.shape[0])
+                    x = int(point[0]*roi.shape[1])
+                    cv.circle(roi, (x,y) , 3, (219,184,121), -1)
+                alignFace = fl.align(roi, landmarks, face_recognizer.refLandmarks)
+            if len(faces) == 1: 
+                cv.imshow('Align Face', alignFace)
+            cv.imshow('Sample', img)
+            ch = cv.waitKey(5)
+            if ch & 0xFF == ord('q'):
+                break
+        cap.release()
+    elif fileExtension in ('.png', '.jpg','.jpeg', '.bmp'):
+        img = cv.imread(src)
+        faces = det.detect(img)
+        for face, i in enumerate(faces):
+            roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
+            landmarks = fl.findLandmarks(roi)
+            for point in landmarks:
+                y = int(point[1]*roi.shape[0])
+                x = int(point[0]*roi.shape[1])
+                cv.circle(roi, (x,y) , 3, (219,184,121), -1)
+            alignFace = fl.align(roi, landmarks, face_recognizer.refLandmarks)
+            cv.imshow('Align Face ' + str(i) , alignFace)
+        cv.imshow('Sample', img)
+        cv.waitKey(0) 
+    else:
+        print("Wrong source of image")
