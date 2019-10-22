@@ -15,13 +15,13 @@ refLandmarks = np.float32([[0.31556875000000000, 0.4615741071428571],  # left ey
 class FaceRecognizer(ABC):
      @staticmethod
      def create(args): 
-        if args['name'] == 'DNN':
-            return DNNRecognizer(args['recXML'],
-                   args['recWidth'], args['recHeight'], args['recThreshold'], 
-                   args['detName'], args['detXML'], 
-                   args['detWidth'], args['detHeight'], args['detThreshold'],
-                   args['lmarksName'], args['lmarksXML'],
-                   args['lmarksWidth'], args['lmarksHeight'])
+        if args['rdName'] == 'DNNfr':
+            return DNNRecognizer(args['rdXML'],
+                   args['rdWidth'], args['rdHeight'], args['rdThreshold'], 
+                   args['fdName'], args['fdXML'], 
+                   args['fdWidth'], args['fdHeight'], args['fdThreshold'],
+                   args['lmName'], args['lmXML'],
+                   args['lmWidth'], args['lmHeight'])
         else:
             raise Exception('Error: wrong recognizer name')
 
@@ -50,7 +50,7 @@ class FaceLandmarks(ABC):
     @staticmethod
     def create(args): 
          if args['name'] == 'DNNLandmarks':
-            return DNNLandmarks(args['model'], args['width'],
+            return DNNLandmarks(args['modelXML'], args['width'],
                                                args['height'])
          else:
             raise Exception('Error: wrong detector name')
@@ -62,7 +62,7 @@ class FaceLandmarks(ABC):
 class DNNLandmarks(ABC):
     def __init__(self, modelXML, width, height):
         self.modelXML = modelXML
-        self.modelBIN =  os.path.splitext(seld.modelXML)[0] + '.bin'
+        self.modelBIN =  os.path.splitext(self.modelXML)[0] + '.bin'
         self.width = width
         self.height = height
         backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
@@ -127,9 +127,7 @@ class DNNLandmarks(ABC):
 class DNNDetector(FaceDetector):
     def __init__(self, modelXML, width, height, threshold):
         self.modelXML = modelXML
-        print("m " + modelXML)
         self.modelBIN = os.path.splitext(self.modelXML)[0] + '.bin'
-        print(self.modelBIN)
         self.width = width
         self.height = height
         self.threshold = threshold
