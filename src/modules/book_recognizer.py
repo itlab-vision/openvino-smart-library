@@ -53,7 +53,7 @@ class Recognizer(BookRecognizer):
         return arr
 
 
-class Recognizer2(BookRecognizer):
+class QRBookRecognizer(BookRecognizer):
     def create(self, detName):
         pass
 
@@ -68,8 +68,6 @@ class Recognizer2(BookRecognizer):
         for obj in decodedObjects:
             if obj.type == 'QRCODE':
                 ans = obj.data.decode('utf-8')
-            print('Type : ', obj.type)
-            print('Data : ', obj.data, '\n')
 
         # Return decode information
         return ans
@@ -98,6 +96,4 @@ class Recognizer2(BookRecognizer):
             for j in range(0, n):
                 cv2.line(frame, hull[j], hull[(j + 1) % n], (255, 0, 0), 3)
 
-        # Display results
-        cv2.imshow("Results", frame)
-        cv2.waitKey(0)
+        return frame

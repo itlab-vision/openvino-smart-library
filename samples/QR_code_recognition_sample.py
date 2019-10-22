@@ -21,8 +21,9 @@ if __name__ == '__main__':
     # Get information from QR
     answer = []
     for i in images:
-        answer.append(br.Recognizer2.recognize(i))
-        br.Recognizer2.display(i)
+        answer.append(br.QRBookRecognizer.recognize(i))
+        cv2.imshow("Results", br.QRBookRecognizer.display(i))
+        cv2.waitKey(0)
 
     # Print our results
     for i in answer:
