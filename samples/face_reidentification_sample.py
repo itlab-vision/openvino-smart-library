@@ -79,8 +79,7 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         fileName, fileExtension = os.path.splitext(src)
 
     rec = face_recognizer.FaceRecognizer.create(rdArgs)
-    bd = np.empty((0, 256), dtype=np.float32)
-
+   
     if src == 'web' or fileExtension in ('.mkv', '.mp4'):
         src = 0 if src == 'web' else src
         cap = cv.VideoCapture(src)
@@ -88,11 +87,10 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         while(True):
             _, img = cap.read()
             ch = cv.waitKey(5)
-            faces, out = rec.recognize(img, bd)
+            faces, out = rec.recognize(img)
             if ch & 0xFF == ord('r') and not identified:
-
-                bd = np.append(bd, [rec.register(img)], axis=0)
-                cv.putText(img, "You are user #" + str(bd.shape[0]),
+                n = rec.register(img)
+                cv.putText(img, "You are user #" +  str(n),
                         (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, color=(0, 255, 0))
                 cv.imshow("window",  img)
                 cv.waitKey(1000)

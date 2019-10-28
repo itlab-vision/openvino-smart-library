@@ -159,11 +159,12 @@ class DNNRecognizer(FaceRecognizer):
         args = dict(name = lmarksName, modelXML = lmarksXML,
                     width = lmarksWidth, height = lmarksHeight)
         self.fl = FaceLandmarks.create(args)
-
         args = dict(name = detName, modelXML = detXML,
                     width = detWidth, height = detHeight, threshold = detThreshold)
         self.det = FaceDetector.create(args)
 
+        self.bd = np.empty((0, 256), dtype=np.float32)
+        self.counter = 0 
         self.modelXML = recXML
         self.modelBIN = os.path.splitext(self.modelXML)[0] + '.bin'
         self.width = recWidth
@@ -197,13 +198,15 @@ class DNNRecognizer(FaceRecognizer):
             featureVec = np.zeros(256)
         return (faces, featureVec)
 
-    def recognize(self, img, refVec):
+    def recognize(self, img):
         faces, fVec = self.getFeatures(img)
-        return (faces, self.similarity(fVec, refVec))
+        return (faces, self.similarity(fVec, self.bd))
     
     def register(self, img, ID = 0):
         _, vec = self.getFeatures(img)
-        return vec
+        self.bd = np.append(self.bd, [vec], axis=0)
+        self.counter = self.bd.shape[0]
+        return self.counter
     
     
 

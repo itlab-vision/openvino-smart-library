@@ -17,7 +17,7 @@ def build_argparse():
     parser.add_argument('-h_fd', type = int, default = '300',
                           dest = 'height', help = 'Image height to resize' ) 
     parser.add_argument('-t_fd', type = float, default = '0.9',
-                          dest = 'threshold', help = 'Probability threshold for face fdections.' ) 
+                          dest = 'threshold', help = 'Probability threshold for face dections.' ) 
     parser.add_argument('-i', type = str, default='web',
                         dest = 'image', help = 'Source of images. Specify path to image or video, or pass <web> to open web-camera')
     args = parser.parse_args()
