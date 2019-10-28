@@ -8,9 +8,17 @@ import book_recognizer as br
 
 # Main
 if __name__ == '__main__':
+    file = open('qr-codes/qr.txt')
+    # Recognizer by OpenCv
+    qrDecoder = br.QRBookRecognizerByOpenCv()
+    inputImage = 0
+    if len(sys.argv) > 1:
+        inputImage = cv2.imread(sys.argv[1])
+    else:
+        inputImage = cv2.imread("C:\images\qr-generated.png")
+    qrDecoder.recognize(inputImage)
     # Read images
     images = []
-    file = open('qr-codes/qr.txt')
     while(True):
         s = file.readline()
         if s == '':
