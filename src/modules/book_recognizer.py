@@ -105,6 +105,7 @@ class QRBookRecognizerByOpenCv(BookRecognizer):
     def create(self, detName):
         pass
 
+    # Constructor
     def __init__(self):
         self.qrDecoder = cv2.QRCodeDetector()
 
