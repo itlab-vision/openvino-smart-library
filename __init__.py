@@ -13,6 +13,7 @@ from Entities.User import *
 from Entities.Book import *
 
 uknownID = -1
+count = 0
 
 def build_argparse():
     parser = argparse.ArgumentParser(description='Face recognition sample')
@@ -78,7 +79,16 @@ def recUser(img):
                     (face[0][0],face[0][1]-5), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)         
         cv.rectangle(img, face[0], face[1], (22, 163, 245), 2)
     return userID
-               
+
+def printInfo(count):
+    os.system('cls')
+    if count == 0:
+        BD.printUsers()
+    elif count == 1:
+        BD.printBooks()
+    elif count == 2:
+         BD.printBBooks()
+
 
 args = build_argparse()
 rdArgs = dict(rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
@@ -127,12 +137,37 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         ch = cv.waitKey(5) & 0xFF
 
         userID = recUser(img)   
+        
         if userID != uknownID:
+            indent = 10
             text = 'Place book in the selected area'
             txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2) 
             cv.rectangle(img, (5,  img.shape[0]),  (5 + txtSize[0][0],  img.shape[0] - 5 - txtSize[0][1]), (255, 255, 255), cv.FILLED)
-            cv.putText(img, 'Place book in the selected area',
+            cv.putText(img, text,
                     (5, img.shape[0]-5), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)
+                
+            text = 'Press:'
+            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
+            cv.putText(img, text,
+                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
+
+            indent += txtSize[0][1] + 5
+            text = 'r - register' 
+            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
+            cv.putText(img, text,
+                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
+           
+            indent += txtSize[0][1] + 5
+            text = 'b - to get or ret a book'
+            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
+            cv.putText(img, text,
+                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
+            
+            indent += txtSize[0][1] + 5
+            text = 'f - get info' 
+            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
+            cv.putText(img, text,
+                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
 
             if ch == ord('b'):
                 print('')
@@ -140,13 +175,21 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         elif ch  == ord('r'):
             n = rec.register(img)
             BD.addUser(n)
-            cv.putText(img, 'You are user #' +  str(n),
-                    (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, (22, 163, 245), 2)
+            text = 'You are user #' +  str(n)
+            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2)
+            cv.rectangle(img, (5,  25),  (5 + txtSize[0][0],  20 - txtSize[0][1]), (255, 255, 255), cv.FILLED)
+            cv.putText(img, text,
+                    (5,20), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)
+            os.system('cls')
             BD.printUsers()
             cv.imshow('window',  img)
             cv.waitKey(1000)
         
         cv.imshow('window',  img)
+        if ch == ord('f'):
+            count = count + 1 
+            printInfo(count % 3)
+
         if ch == ord('q'):
             break
     cap.release()
