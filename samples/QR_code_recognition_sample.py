@@ -8,43 +8,53 @@ import book_recognizer as br
 import QR_generator as qr
 
 
+# Display QR code location
+def display(image, bbox):
+    n = len(bbox)
+    for j in range(n):
+        cv2.line(image, tuple(bbox[j][0]), tuple(bbox[(j + 1) % n][0]), (255, 0, 0), 3)
+
+    # Display results
+    cv2.imshow("Results", image)
+
+
+def createArgparse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name', nargs='?', default=None)
+    return parser.parse_args()
+
+
 # Main
 if __name__ == '__main__':
-    file = open('qr-codes/qr.txt')
-    # Recognizer by OpenCV
-    qrDecoder = br.QRBookRecognizerByOpenCv()
-    inputImage = 0
-    if len(sys.argv) > 1:
-        inputImage = cv2.imread(sys.argv[1])
-    else:
-        inputImage = cv2.imread("C:\images\qr-generated.png")
-    qrDecoder.recognize(inputImage)
-    # Read images
-    images = []
-    while(True):
-        s = file.readline()
-        if s == '':
-            break
+    qrDecoder = br.BookRecognizer.create(2)
+    args = createArgparse()
+    if args.name is not None:
+        if args.name == 'GUI':
+            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            if not cap.isOpened():
+                raise IOError("Cannot open WebCam")
+            data = ""
+            while True:
+                ret, image = cap.read()
+                cv2.imshow('WebCam', image)
+                key = cv2.waitKey(10) & 0xff
+                if key == 27:
+                    break
+                data = qrDecoder.recognize(image)
+                if data != "":
+                    break
+            print("Decoded Data : {}".format(data))
+            cap.release()
+            cv2.destroyAllWindows()
         else:
-            images.append(cv2.imread(s[0:len(s)-1]))
-
-    # Get information from QR
-    answer = []
-    for i in images:
-        answer.append(br.QRBookRecognizer.recognize(i))
-        cv2.imshow("Results", br.QRBookRecognizer.display(i))
-        cv2.waitKey(0)
-
-    # Print our results
-    for i in answer:
-        print(i)
-
-    # Try to generate qr-code and recognize by OpenCV
-    gen = qr.QRgenerator()
-    image = gen.makeQR("Aleksandr Pushkin : 'Evgeniy Onegin' ")
-    image.save("qr.png")
-    image = cv2.imread("qr.png")
-    cv2.imshow("QR-code", image)
-    cv2.waitKey(0)
-    qrDecoder.recognize(image)
-
+            s = args.name
+            image = cv2.imread(s)
+            data = qrDecoder.recognize(image)
+            if data == "":
+                print("QR-code not detected!!!")
+            else:
+                display(image, qrDecoder.box)
+                cv2.waitKey(0)
+                print("Decoded Data : {}".format(data))
+    else:
+        print("To use recognizer, you have to input 'GUI' or name of your image as arguments of program")
