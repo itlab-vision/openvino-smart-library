@@ -9,13 +9,13 @@ refLandmarks = np.float32([[0.31556875000000000, 0.4615741071428571],  # left ey
                            [0.68262291666666670, 0.4615741071428571],  # right eye
                            [0.50026249999999990, 0.6405053571428571],  # tip of nose
                            [0.34947187500000004, 0.8246919642857142],  # left lip corner, right lip corner
-                           [0.65343645833333330, 0.8246919642857142]])  # right lip corner
+                           [0.65343645833333330, 0.8246919642857142]]) # right lip corner
 
 
 class FaceRecognizer(ABC):
      @staticmethod
      def create(args): 
-        if args['rdName'] == 'DNNfr':
+        if args['name'] == 'DNNfr':
             return DNNRecognizer(args['rdXML'],
                    args['rdWidth'], args['rdHeight'], args['rdThreshold'], 
                    args['fdName'], args['fdXML'], 
@@ -181,6 +181,7 @@ class DNNRecognizer(FaceRecognizer):
         if fVec.size and  refVecs.size:
           return np.dot(fVec, refVecs)/(np.linalg.norm(fVec)*np.linalg.norm(refVecs, axis=0))
         else:
+          print(fVec.size)
           return np.zeros((1, 1))
 
     def getFeatures(self, img):
@@ -195,7 +196,7 @@ class DNNRecognizer(FaceRecognizer):
             out	= self.net.forward()
             featureVec = out.flatten()
         else:
-            featureVec = np.zeros(256)
+            featureVec = np.empty(0)
         return (faces, featureVec)
 
     def recognize(self, img):

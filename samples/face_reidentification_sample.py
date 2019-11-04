@@ -41,13 +41,13 @@ def build_argparse():
     return args
 
 args = build_argparse()
-rdArgs = dict(rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
+rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
 fdName = '', fdXML = '', fdWidth = 0, fdThreshold= 0,
 lmName = '', lmXML= 0, lmWidth= 0, lmHeight= 0)
 
 if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
     
-    rdArgs ['rdName'] = args.rdDet
+    rdArgs ['name'] = args.rdDet
     if (args.rdModel != None):
         rdArgs ['rdXML'] = args.rdModel
     if (args.rdWidth != None):

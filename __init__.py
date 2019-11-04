@@ -50,33 +50,60 @@ def build_argparse():
     args = parser.parse_args()
     return args
 
+def putText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
+    textSize = cv.getTextSize(text, font, scale, thickness) 
+    if rect:
+        cv.rectangle(img, pos, (textSize[0][0] + ix, 
+                pos[1]-textSize[0][1] + iy), (255, 255, 255), cv.FILLED)
+    cv.putText(img, text, (pos[0], pos[1]+iy),
+                font, scale, color, thickness)
+def putInfo(img):
+    indent = 10
+    text = 'Show book'
+    putText(img, text, (5,  img.shape[0]), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
+            (22, 163, 245), 1, 2)
+
+    text = 'Press:'
+    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+            (22, 163, 245), 1, 1, 0)
+    txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN, 1, 2) 
+
+    indent += txtSize[0][1] + 5
+    text = 'r - register'
+    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+                        (22, 163, 245), 1, 1, 0)
+    txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
+
+    indent += txtSize[0][1] + 5
+    text = 'b - to get or ret a book'
+    txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
+    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+            (22, 163, 245), 1, 1, 0)
+
+    indent += txtSize[0][1] + 5
+    text = 'f - get info' 
+    txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1)
+    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+            (22, 163, 245), 1, 1, 0)
+
 def recUser(img):
     faces, out = rec.recognize(img)
     userID = uknownID
     for face in faces:
         if len(faces) > 1:
             text = 'No more than one person at a time'
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2) 
-            cv.rectangle(img, (0,50), (txtSize[0][0], 
-                   50-txtSize[0][1]), (255, 255, 255), cv.FILLED)
-            cv.putText(img, text,(0,50),
-                                cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)
+            putText(img, text, (0,30), 0, -5, cv.FONT_HERSHEY_SIMPLEX, 
+                                           (22, 163, 245), 1, 2)
 
         if np.amax(out) > rec.threshold:
             userID = str(np.argmax(out)+1)
             text = 'User #' + str(userID)
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2) 
-            cv.rectangle(img, face[0], (face[0][0]+txtSize[0][0], 
-                   face[0][1]-txtSize[0][1]-5), (255, 255, 255), cv.FILLED)
-            cv.putText(img, text,
-                   (face[0][0],face[0][1]-5), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)
+            putText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
+                                           (22, 163, 245), 1, 2)
         else:
             text = 'Unknown'
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2) 
-            cv.rectangle(img, face[0], (face[0][0]+txtSize[0][0],
-                    face[0][1]-txtSize[0][1]-5), (255, 255, 255), cv.FILLED)
-            cv.putText(img, text,
-                    (face[0][0],face[0][1]-5), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)         
+            putText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
+                                           (22, 163, 245), 1, 2)     
         cv.rectangle(img, face[0], face[1], (22, 163, 245), 2)
     return userID
 
@@ -87,17 +114,17 @@ def printInfo(count):
     elif count == 1:
         BD.printBooks()
     elif count == 2:
-         BD.printBBooks()
+        BD.printBBooks()
 
 
 args = build_argparse()
-rdArgs = dict(rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
+rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
 fdName = '', fdXML = '', fdWidth = 0, fdThreshold= 0,
 lmName = '', lmXML= 0, lmWidth= 0, lmHeight= 0)
 BD = DynamicBD()
 
 if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
-    rdArgs ['rdName'] = args.rdDet
+    rdArgs ['name'] = args.rdDet
     if (args.rdModel != None):
         rdArgs ['rdXML'] = args.rdModel
     if (args.rdWidth != None):
@@ -139,47 +166,16 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         userID = recUser(img)   
         
         if userID != uknownID:
-            indent = 10
-            text = 'Place book in the selected area'
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2) 
-            cv.rectangle(img, (5,  img.shape[0]),  (5 + txtSize[0][0],  img.shape[0] - 5 - txtSize[0][1]), (255, 255, 255), cv.FILLED)
-            cv.putText(img, text,
-                    (5, img.shape[0]-5), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)
-                
-            text = 'Press:'
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
-            cv.putText(img, text,
-                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
-
-            indent += txtSize[0][1] + 5
-            text = 'r - register' 
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
-            cv.putText(img, text,
-                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
-           
-            indent += txtSize[0][1] + 5
-            text = 'b - to get or ret a book'
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
-            cv.putText(img, text,
-                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
-            
-            indent += txtSize[0][1] + 5
-            text = 'f - get info' 
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
-            cv.putText(img, text,
-                    (5, indent), cv.FONT_HERSHEY_PLAIN, 1, (22, 163, 245), 1)
-
+            putInfo(img)
             if ch == ord('b'):
-                print('')
+                print('b')
             
         elif ch  == ord('r'):
             n = rec.register(img)
             BD.addUser(n)
             text = 'You are user #' +  str(n)
-            txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2)
-            cv.rectangle(img, (5,  25),  (5 + txtSize[0][0],  20 - txtSize[0][1]), (255, 255, 255), cv.FILLED)
-            cv.putText(img, text,
-                    (5,20), cv.FONT_HERSHEY_SIMPLEX, 1, (22, 163, 245), 2)
+            putText(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
+                                           (22, 163, 245), 1, 2)
             os.system('cls')
             BD.printUsers()
             cv.imshow('window',  img)
@@ -192,4 +188,5 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
 
         if ch == ord('q'):
             break
+
     cap.release()

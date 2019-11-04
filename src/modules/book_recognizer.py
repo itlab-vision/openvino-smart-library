@@ -1,10 +1,15 @@
 import cv2
+import sys
+import time
+import numpy as np
 from abc import ABC, abstractmethod
 
+
 class BookRecognizer(ABC):
-    @abstractmethod
-    def create(self, detName):
-        """Create recognizer"""
+    @staticmethod
+    def create(version, detName=1):
+        if version == 2:
+            return QRBookRecognizer()
         
     @abstractmethod
     def recognize(self, frame, tpls, coeff):
@@ -48,3 +53,19 @@ class Recognizer(BookRecognizer):
             arr.append(len(good))
         
         return arr
+
+
+class QRBookRecognizer(BookRecognizer):
+    # Constructor
+    def __init__(self):
+        self.qrDecoder = cv2.QRCodeDetector()
+        self.box = 0
+
+    def recognize(self, input_image, tpls=0, coeff=0) -> str:
+        # Detect and decode the qrcode
+        data, bbox, rectifiedImage = self.qrDecoder.detectAndDecode(input_image)
+        if len(data) > 0:
+            self.box = bbox
+            return data
+        else:
+            return ""

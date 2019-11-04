@@ -9,7 +9,7 @@ class BorrowedBooks():
         self.userID = userID
         self.borrowed = borrowed
         self.bdate = date
-        self.rdate = publisher
+        self.rdate = rdate
 
 class DynamicBD():
     
@@ -32,6 +32,7 @@ class DynamicBD():
         lname = ''
         mname = ''
         flag = 0
+
         for c in author:
             if(flag == 4):
                 flag = 0
@@ -69,7 +70,7 @@ class DynamicBD():
         dateNow = str(datetime.now())
         find = False
         for book in self.BBooks:
-            if book.bookID ==  bookID and userID == book.userID:
+            if book.bookID ==  bookID and userID == book.userID and not book.borrowed: 
                 book.borrowed = not book.borrowed
                 book.rdate = dateNow
                 find = True
@@ -79,19 +80,19 @@ class DynamicBD():
             bbook = BorrowedBooks(bookID, userID, False, dateNow, '' )
             find = True
             self.BBooks.append(bbook)
+    
         return find
-        
-        
-
-
+           
     def printUsers(self):
-        print('ID', ' '*10, 'First Name')
+        print('{:<10}{:<10}'.format('ID', 'Name'))
         for user in self.Users:
-            print(user.user_id, ' '*10, user.first_name)
+            print('{:<10}{:<10}'.format(user.user_id, user.first_name))
+
 
     def printBooks(self):
         authorsStr = ''
-        print('ID',' '*10, 'Author',' '*10, 'Title',' '*10, 'Publisher',' '*10, 'Publication date')
+        print('{:<10}{:<20}{:<10}{:<10}{:<10}'.format('ID', 'Author','Title',
+        'Publisher', 'Publication date'))
         for book in self.Books:
             for j in enumerate(book.authors):
                 if (j[0] == len(book.authors) - 1):
@@ -99,15 +100,17 @@ class DynamicBD():
                 authorsStr += (book.authors[j[0]].first_name + ' ' +
                             book.authors[j[0]].last_name + ' ' +
                             book.authors[j[0]].middle_name + c)
-            print(book.book_id, ' '*10, authorsStr,' '*10, book.title, book.publisher, book.year)
+            print('{:<10}{:<20}{:<10}{:<10}{:<10}'.format(book.book_id, authorsStr,
+                book.title, book.publisher, book.year))
 
     def printBBooks(self):
-        print('User ID',' '*10, 'Book ID',' '*10, 'First name',' '*10, 'Title', ' '*10, 'Borrow date',' '*10,'Return date')
+        print('{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format('User ID', 'Book ID', 'First name',
+             'Title',  'Borrow date','Return date'))
         for bbook in self.BBooks:
             for book in self.Books:
                 for user in self.Users:
                         if bbook.userID == user.user_id and bbook.bookID == book.book_id:
-                            s = user.user_id + ' '*10 + book.bookID + ' '*10 + user.first_name + ' '*10 + book.title + ' '*10 + bbook.bdate +  ' '*10 + bbook.rdate
-                            print(s)
+                            print('{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format(user.user_id, book.bookID,
+                                 user.first_name, book.title, bbook.bdate, bbook.rdate))
                         
  
