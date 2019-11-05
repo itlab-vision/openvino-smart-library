@@ -1,14 +1,13 @@
 import cv2
-import sys
-import time
+import pyzbar.pyzbar as pyzbar
 import numpy as np
 from abc import ABC, abstractmethod
 
 
 class BookRecognizer(ABC):
     @staticmethod
-    def create(version, detName=1):
-        if version == 2:
+    def create(args):
+        if args.recognizer == 'QR':
             return QRBookRecognizer()
         
     @abstractmethod
@@ -58,14 +57,18 @@ class Recognizer(BookRecognizer):
 class QRBookRecognizer(BookRecognizer):
     # Constructor
     def __init__(self):
-        self.qrDecoder = cv2.QRCodeDetector()
-        self.box = 0
+        self.objects = []
 
-    def recognize(self, input_image, tpls=0, coeff=0) -> str:
-        # Detect and decode the qrcode
-        data, bbox, rectifiedImage = self.qrDecoder.detectAndDecode(input_image)
-        if len(data) > 0:
-            self.box = bbox
-            return data
-        else:
-            return ""
+    def recognize(self, frame, tpls=0, coeff=0):
+        # Find barcodes and QR codes
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        self.objects = pyzbar.decode(gray)
+
+        # Analise results
+        ans = ""
+        for obj in self.objects:
+            if obj.type == 'QRCODE':
+                ans = obj.data.decode('utf-8')
+
+        # Return decode information
+        return ans

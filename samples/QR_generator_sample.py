@@ -4,7 +4,6 @@ import argparse
 import numpy as np
 import cv2
 sys.path.append("../src/modules")
-import book_recognizer as br
 import QR_generator as qr
 
 
@@ -19,7 +18,6 @@ def createArgparse():
 if __name__ == '__main__':
     args = createArgparse()
     gen = qr.QRgenerator()
-    qrDecoder = br.BookRecognizer.create(2)
     if args.string is not None:
         image = gen.makeQR(args.string)
         if args.out == "console":
