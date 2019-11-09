@@ -13,7 +13,6 @@ def createArgparse():
     parser.add_argument('-o', '--out', type=str, default="console")
     return parser.parse_args()
 
-
 # Main
 if __name__ == '__main__':
     args = createArgparse()

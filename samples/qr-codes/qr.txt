@@ -1,0 +1,3 @@
+qr-codes/qr-code1.jpg
+qr-codes/qr-code2.jpg
+qr-codes/qr-generated.png

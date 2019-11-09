@@ -74,3 +74,4 @@ if __name__ == '__main__':
                 print("Decoded Data : {}".format(data))
     else:
         print("To use recognizer, you have to input type of recognizer and method name('GUI' or name of your image as arguments of program)")
+
