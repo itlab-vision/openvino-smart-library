@@ -12,10 +12,11 @@ class QRgenerator(object):
     # Creating Qr-code
 
     def makeQR(self, data):
-
+        
         """Add data to this QR Code."""
+        self.generator.data_list.clear()
         self.generator.add_data(data)
-
+        
         """
         Compile the data into a QR Code array.
         :param fit: If ``True`` (or if a size has not been provided), find the

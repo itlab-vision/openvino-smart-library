@@ -181,7 +181,6 @@ class DNNRecognizer(FaceRecognizer):
         if fVec.size and  refVecs.size:
           return np.dot(fVec, refVecs)/(np.linalg.norm(fVec)*np.linalg.norm(refVecs, axis=0))
         else:
-          print(fVec.size)
           return np.zeros((1, 1))
 
     def getFeatures(self, img):

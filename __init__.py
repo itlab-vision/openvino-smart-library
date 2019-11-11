@@ -2,21 +2,20 @@ import sys, os
 import argparse
 import numpy as np
 import cv2 as cv
+import json
 
 sys.path.insert(0,'src/modules')
-import face_recognizer
-import book_recognizer
+import face_recognizer as fr 
+import book_recognizer as br
 
 sys.path.insert(0, 'src/infrastructure')
 from DynamicDatabase import *
-from Entities.User import *
-from Entities.Book import *
 
 uknownID = -1
 count = 0
 
-def build_argparse():
-    parser = argparse.ArgumentParser(description='Face recognition sample')
+def createArgparse():
+    parser = argparse.ArgumentParser(description='Smart Library Sample')
     parser.add_argument('-reid', type = str, default = 'DNNfr',
                         dest = 'rdDet', help = 'Type  - DNNfr')
     parser.add_argument('-m_rd', type = str, default = 'face-reidentification-retail-0095.xml',
@@ -45,18 +44,33 @@ def build_argparse():
                           dest = 'lmWidth', help = 'Image width to resize')
     parser.add_argument('-h_lm', type = int, default = '48',
                           dest = 'lmHeight', help = 'Image height to resize' ) 
+    parser.add_argument('-br', type = str,  default='QR',
+                        dest = 'br', help = 'Type - QR' )
+    parser.add_argument('-lib', type = str, default='library.json',
+                         dest = 'lib', help = 'Path to library' )                      
     parser.add_argument('-w', type = int, default='0',
                         dest = 'web', help = 'Specify number of web to open. Default is 0')
     args = parser.parse_args()
     return args
 
+def createLibrary(libPath):
+    print(libPath)
+    with open(libPath, 'r', encoding='utf-8') as lib:
+        data = json.load(lib)
+    
+    for book in data['books']:
+        BD.addBook(book['id'], book['title'],  book['author'],
+                   book['publisher'], book['year'])
+
 def putText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
+
     textSize = cv.getTextSize(text, font, scale, thickness) 
     if rect:
         cv.rectangle(img, pos, (textSize[0][0] + ix, 
                 pos[1]-textSize[0][1] + iy), (255, 255, 255), cv.FILLED)
     cv.putText(img, text, (pos[0], pos[1]+iy),
                 font, scale, color, thickness)
+
 def putInfo(img):
     indent = 10
     text = 'Show book'
@@ -87,7 +101,7 @@ def putInfo(img):
             (22, 163, 245), 1, 1, 0)
 
 def recUser(img):
-    faces, out = rec.recognize(img)
+    faces, out = faceRec.recognize(img)
     userID = uknownID
     for face in faces:
         if len(faces) > 1:
@@ -95,8 +109,8 @@ def recUser(img):
             putText(img, text, (0,30), 0, -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
 
-        if np.amax(out) > rec.threshold:
-            userID = str(np.argmax(out)+1)
+        if np.amax(out) > faceRec.threshold:
+            userID = int(np.argmax(out) + 1)
             text = 'User #' + str(userID)
             putText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
@@ -116,8 +130,17 @@ def printInfo(count):
     elif count == 2:
         BD.printBBooks()
 
+def recBook(img):
+    data = bookRec.recognize(img)
+    try: 
+        bID = int(data.split(' ')[0])
+        print(bID)
+        return bID 
+    except ValueError:
+        return -1
 
-args = build_argparse()
+args = createArgparse()
+brArgs = dict(name='')
 rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
 fdName = '', fdXML = '', fdWidth = 0, fdThreshold= 0,
 lmName = '', lmXML= 0, lmWidth= 0, lmHeight= 0)
@@ -151,10 +174,16 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         rdArgs ['lmWidth'] = args.lmWidth
     if (args.lmWidth != None):
         rdArgs ['lmHeight'] = args.lmHeight
+    if (args.br != None): 
+        brArgs['name'] = args.br
+    if (args.br != None): 
+        lib = args.lib
     if (args.web != None): 
         src = args.web
-
-    rec = face_recognizer.FaceRecognizer.create(rdArgs)
+    
+    createLibrary(lib)
+    bookRec = br.BookRecognizer.create(brArgs)
+    faceRec = fr.FaceRecognizer.create(rdArgs)
    
     cap = cv.VideoCapture(src)
     identified = False
@@ -168,10 +197,14 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         if userID != uknownID:
             putInfo(img)
             if ch == ord('b'):
-                print('b')
+                bookID = recBook(img)
+                os.system('cls')
+                print(bookID)
+                BD.getRetBook(userID, bookID)
+                BD.printBBooks()
             
         elif ch  == ord('r'):
-            n = rec.register(img)
+            n = faceRec.register(img)
             BD.addUser(n)
             text = 'You are user #' +  str(n)
             putText(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 

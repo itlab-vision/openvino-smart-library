@@ -5,7 +5,7 @@ import cv2 as cv
 sys.path.append("../src/modules")
 import face_recognizer
 
-def build_argparse():
+def createArgparse():
     parser = argparse.ArgumentParser(description='Face recognition sample')
     parser.add_argument('-reid', type = str, default = 'DNNfr',
                         dest = 'rdDet', help = 'Type  - DNNfr')
@@ -40,7 +40,7 @@ def build_argparse():
     args = parser.parse_args()
     return args
 
-args = build_argparse()
+args = createArgparse()
 rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
 fdName = '', fdXML = '', fdWidth = 0, fdThreshold= 0,
 lmName = '', lmXML= 0, lmWidth= 0, lmHeight= 0)
@@ -86,9 +86,9 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
         identified = False
         while(True):
             _, img = cap.read()
-            ch = cv.waitKey(5)
+            key = cv.waitKey(5) & 0xFF
             faces, out = rec.recognize(img)
-            if ch & 0xFF == ord('r') and not identified:
+            if (key == ord('r') or key == ord('R')) and not identified:
                 n = rec.register(img)
                 cv.putText(img, "You are user #" +  str(n),
                         (0,50), cv.FONT_HERSHEY_SIMPLEX, 2, color=(0, 255, 0))
@@ -109,6 +109,6 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
                 cv.rectangle(img, face[0], face[1], color=(0, 255, 0))
 
             cv.imshow("window",  img)
-            if ch & 0xFF == ord('q'):
+            if key == 27  or key == ord('q') or  key == ord('Q')::
                 break
         cap.release()

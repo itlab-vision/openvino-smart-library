@@ -5,7 +5,7 @@ import cv2 as cv
 sys.path.append('../src/modules')
 import face_recognizer
 
-def build_argparse():
+def createArgparse():
     parser = argparse.ArgumentParser(description='Face alignment sample')
     parser.add_argument('-fd', type = str, default = 'DNNfd',
                         dest = 'fdDet', help = 'Type of detector. Available DNN face detector - DNNfd')
@@ -35,7 +35,7 @@ fdArgs = dict(name = '', modelXML = '',
             width = 0, height = 0, threshold = 0)
 lmArgs = dict(name = '', modelXML = '',  
             width = 0, height = 0, threshold = 0)
-args = build_argparse()
+args = createArgparse()
 
 if (args.fdDet != None and args.lmDet != None):
 
@@ -64,7 +64,7 @@ if (args.fdDet != None and args.lmDet != None):
     det = face_recognizer.FaceDetector.create(fdArgs)
     fl = face_recognizer.FaceLandmarks.create(lmArgs)
 
-    if src == 'web' or fileExtension in ('.mkv', '.mp4'):
+    if src == 'web' or fileExtension in ('.mkv', '.mp4', 'avi'):
         src = 0 if src == 'web' else src
         cap = cv.VideoCapture(src)
         landmarks = []

@@ -4,11 +4,11 @@ from Entities.Author import *
 from Entities.Book import *
 
 class BorrowedBooks():
-    def __init__(self, book_id, userID, borrowed, bdate, rdate):
-        self.book_id = book_id
+    def __init__(self, bookID, userID, borrowed, bdate, rdate):
+        self.bookID = bookID
         self.userID = userID
         self.borrowed = borrowed
-        self.bdate = date
+        self.bdate = bdate
         self.rdate = rdate
 
 class DynamicBD():
@@ -26,40 +26,20 @@ class DynamicBD():
     def deleteUser(self):
         ''' '''
     
-    def addBook(self, bookID, title, date, publisher, author):
-        authors = []
-        fname = ''
-        lname = ''
-        mname = ''
-        flag = 0
+    def addBook(self, bookID, title, author,  publisher, date):
+        lAuthors = []
+        authors = author.split(', ')
+        for a in authors:
+            a = a.replace('.', '')
+            names = a.split(' ')
+            if len(names) == 3:
+                lAuthors.append(Author(-1, names[0], names[2], names[1]))
+            elif len(names) == 2:
+                lAuthors.append(Author(-1, names[0], names[1], ''))
+            else:
+                Exception('Book`s authors not in correct format')
 
-        for c in author:
-            if(flag == 4):
-                flag = 0
-                if(c == ' '):
-                    continue
-            if(c == ' '):
-                flag = flag + 1
-                continue
-            if(c == ','):
-                flag = 4
-                authors.append(Author(-1, fname, lname, mname))
-                fname = ''
-                lname = ''
-                mname = ''
-                continue
-            if(flag == 0):
-                fname += c
-                continue
-            if(flag == 1):
-                lname += c
-                continue
-            if(flag == 2):
-                mname += c
-                continue
-        authors.append(Author(-1, fname, lname, mname))
-
-        book = Book(bookID, '', title, date, publisher, authors,)
+        book = Book(bookID, '', title, date, publisher, lAuthors)
         book._print()
         self.Books.append(book)
     
@@ -67,20 +47,33 @@ class DynamicBD():
         ''' '''    
      
     def getRetBook(self, userID, bookID):
-        dateNow = str(datetime.now())
+        dateNow = str(datetime.now()).split(' ')[0]
         find = False
+        isBorrowed = False
+
         for book in self.BBooks:
-            if book.bookID ==  bookID and userID == book.userID and not book.borrowed: 
-                book.borrowed = not book.borrowed
-                book.rdate = dateNow
-                find = True
-                break
-        
-        if not find and not book.borrowed:
-            bbook = BorrowedBooks(bookID, userID, False, dateNow, '' )
-            find = True
-            self.BBooks.append(bbook)
-    
+            if book.bookID ==  bookID:
+                if book.borrowed:
+                    find = True
+                    isBorrowed = book.borrowed
+                    if userID == book.userID:
+                        book.borrowed = not book.borrowed
+                        book.rdate = dateNow
+                        print('Book returned succesfully')
+                    else:
+                        print('This book is not on your account')
+
+        if not find and not isBorrowed:
+            for book in self.Books: 
+                if book.book_id ==  bookID:
+                        bbook = BorrowedBooks(bookID, userID, True, dateNow, '' )
+                        find = True
+                        self.BBooks.append(bbook)
+                        print("len =", len(self.BBooks))
+                        print('Book borrowed succesfully')
+        if not find:
+           print('There is no such book')
+            
         return find
            
     def printUsers(self):
@@ -91,26 +84,32 @@ class DynamicBD():
 
     def printBooks(self):
         authorsStr = ''
-        print('{:<10}{:<20}{:<10}{:<10}{:<10}'.format('ID', 'Author','Title',
+        print('{:<10}{:<30}{:<40}{:<10}{:<20}'.format('ID', 'Author','Title',
         'Publisher', 'Publication date'))
         for book in self.Books:
-            for j in enumerate(book.authors):
-                if (j[0] == len(book.authors) - 1):
-                    c = ''
-                authorsStr += (book.authors[j[0]].first_name + ' ' +
-                            book.authors[j[0]].last_name + ' ' +
-                            book.authors[j[0]].middle_name + c)
-            print('{:<10}{:<20}{:<10}{:<10}{:<10}'.format(book.book_id, authorsStr,
+            authorsStr = ''
+            for a in book.authors:
+                if(a.middle_name != ''):
+                    authorsStr += (a.first_name[0] + '. ' +
+                                a.middle_name[0] + '. ' 
+                                + a.last_name)
+                else:
+                    authorsStr += (a.first_name[0] + '. ' + 
+                                   a.last_name)
+                if (a != book.authors[-1]):
+                    authorsStr += ', '
+
+            print('{:<10}{:<30}{:<40}{:<10}{:<20}'.format(book.book_id, authorsStr,
                 book.title, book.publisher, book.year))
 
     def printBBooks(self):
-        print('{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format('User ID', 'Book ID', 'First name',
+        print('{:<10}{:<10}{:<20}{:<40}{:<20}{:<20}'.format('User ID', 'Book ID', 'First name',
              'Title',  'Borrow date','Return date'))
         for bbook in self.BBooks:
             for book in self.Books:
                 for user in self.Users:
-                        if bbook.userID == user.user_id and bbook.bookID == book.book_id:
-                            print('{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format(user.user_id, book.bookID,
-                                 user.first_name, book.title, bbook.bdate, bbook.rdate))
+                    if bbook.userID == user.user_id and bbook.bookID == book.book_id:
+                        print('{:<10}{:<10}{:<20}{:<40}{:<20}{:<20}'.format(user.user_id, book.book_id,
+                                   user.first_name, book.title, bbook.bdate, bbook.rdate))
                         
  

@@ -6,7 +6,7 @@ sys.path.append('../src/modules')
 import face_recognizer
 
 
-def build_argparse():
+def createArgparse():
     parser = argparse.ArgumentParser(description='Face detection sample')
     parser.add_argument('-fd', type = str, default = 'DNNfd',
                         dest = 'detector', help = 'Type of detector. Available DNN face detector - DNNfd')
@@ -25,7 +25,7 @@ def build_argparse():
 
 fdArgs = dict(name = '', modelXML = '',  
             width = 0, height = 0, threshold = 0)
-args = build_argparse()
+args = createArgparse()
 
 if (args.detector != None):
     fdArgs ['name'] = args.detector
