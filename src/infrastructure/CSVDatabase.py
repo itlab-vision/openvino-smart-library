@@ -16,7 +16,7 @@ from Entities.Model import Model
 # При записи любых данных в файлы БД вручную обязательно в конце сделать
 # перевод строки на новую.
 
-path = 'infrastructure/Database/'
+path = 'src/infrastructure/Database/'
 
 # внешняя функция для подсчёта строк в файле
 def NumOfLines(file):
@@ -28,7 +28,7 @@ def NumOfLines(file):
 class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                   IDatabaseFRM, IDatabaseGUI):
     # dbRootDir = 'infrastructure/Database/'
-    dbRootDir = 'infrastructure/Database/'
+    dbRootDir = 'src/infrastructure/Database/'
     
     def __init__(self):
         self.fBooks = self.dbRootDir + 'Books/Books.csv'
