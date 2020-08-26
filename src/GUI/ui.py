@@ -285,13 +285,15 @@ class PlainButton(QPushButton):
         self.setStyleSheet(StyleHelper().getButtonStyleSheet(int(fontSize*scaleFactor)))
 
 class WebcamPixmap(QLabel):
+    aspectRatio = 0
     def __init__(self, mainSize, parent= None):
         super(WebcamPixmap, self).__init__(parent)
         # self.setFixedSize(mainSize.width()*0.95, mainSize.height()*0.47)
         policy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         # policy.setHeightForWidth(True)
-        self.image = QPixmap(":/cap.jpg")
-        self.aspectRatio = self.image.height() / self.image.width()
+        self.setScaledContents(True)
+        self.image = QPixmap(":/cap.png")
+        self.aspectRatio = 3/4 #self.image.height() / self.image.width()
         self.setSizePolicy(policy)
         self.setMinimumSize(mainSize.width()*0.2, mainSize.width()*self.aspectRatio*0.2)
         self.setMaximumSize(mainSize.width(), mainSize.width()*self.aspectRatio)
@@ -307,6 +309,7 @@ class WebcamPixmap(QLabel):
             self.resize(self.width(), self.width()*self.aspectRatio)
         else:
             self.resize(self.height() / self.aspectRatio, self.height())
+    
 
         # self.setPixmap(self.pixmap().scaled(self.width(),self.height(),
         #               Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -520,6 +523,7 @@ class SignInWindow(QMainWindow):
 
         self.adminCodeLabel = TextLabel(15, "Код администратора")
         self.adminCodeEdit = LineEdit()
+        self.adminCodeEdit.setEchoMode(QLineEdit.Password)
         self.infoLabel = TextLabel(10, "* - обязательно")
 
         # push buttons for sign in and sign up
@@ -574,10 +578,11 @@ class SignInWindow(QMainWindow):
         self.btnLayout.setCurrentIndex(0)
 
     def enableBtnSignIn(self):
-         if(self.userID != unknownID):
-             self.btnSignIn.setEnabled(True)
-         else:
-             self.btnSignIn.setEnabled(False)
+        if(self.userID != unknownID):
+            self.btnSignIn.setEnabled(True)
+        else:
+            print(self.userID)
+            self.btnSignIn.setEnabled(False)
 
     def enableBtnAccept(self):
         if(len(self.firstNameEdit.text()) > 0 and
@@ -774,7 +779,6 @@ class MainWindow(QMainWindow):
         self.btnClose.clicked.connect(self.close)
         self.btnMinimize.clicked.connect(self.showMinimized)
         self.btnStat.clicked.connect(self.showAdminInfo)
-        self.btnAddBook.clicked.connect(self.addBook)
 
     def center(self):
         qr = self.frameGeometry()
@@ -849,7 +853,8 @@ class MainWindow(QMainWindow):
         self.mousePos = event.globalPos()
 
     def passID(self, ID, role):
-        self.ID = ID
+        self.userID = ID
+        print("lib win id " ,  self.userID)
         if (role == UserTypes.Administrator):
             print("admin")
             self.btnStat.show()
@@ -867,14 +872,15 @@ class MainWindow(QMainWindow):
         # self.tableBorrBooks.setItem(rowPosition, 4, QTableWidgetItem("1"))
         # self.tableBorrBooks.setItem(rowPosition, 5, QTableWidgetItem("1"))
 
-    def addBook(self):
-        self.bookWin = BookWindow()
-        self.bookWin.show()
-
 class BookWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.titleEdit.textChanged.connect(self.enableBtnAdd)
+        self.authorEdit.textChanged.connect(self.enableBtnAdd)
+        self.publisherEdit.textChanged.connect(self.enableBtnAdd)
+        self.yearEdit.textChanged.connect(self.enableBtnAdd)
+        self.btnAddBook.setEnabled(False)
 
     def setLayouts(self):
         #interface widget layout
@@ -985,59 +991,7 @@ class BookWindow(QMainWindow):
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.mousePos = event.globalPos()
 
-    # """сделать запись в БД"""
-    # def Add(self):
-    #     title = self.lineEditTitle.text()
-    #     author = self.lineEditAuthor.text()
-    #     """Нескольких авторов одной книги вводить в форму через запятную"""
-    #     authors = []
-    #     fname = ""
-    #     lname = ""
-    #     mname = ""
-    #     flag = 0
-    #     for c in author:
-    #         if(flag == 4):
-    #             flag = 0
-    #             if(c == ' '):
-    #                 continue
-    #         if(c == ' '):
-    #             flag = flag + 1
-    #             continue
-    #         if(c == ','):
-    #             flag = 4
-    #             authors.append(Author(-1, fname, lname, mname))
-    #             fname = ""
-    #             lname = ""
-    #             mname = ""
-    #             continue
-    #         if(flag == 0):
-    #             fname += c
-    #             continue
-    #         if(flag == 1):
-    #             lname += c
-    #             continue
-    #         if(flag == 2):
-    #             mname += c
-    #             continue
-    #     authors.append(Author(-1, fname, lname, mname))
 
-    #     publisher = self.lineEditPublisher.text()
-    #     date = self.lineEditDate.text()
-    #     dateNow = str(datetime.now())
-    #     dateNow = dateNow.replace(" ", "")
-    #     dateNow = dateNow.replace(":", "")
-    #     dateNow = dateNow.replace(".", "")
-    #     coverName = dateNow
-    #     self.Cover.save("infrastructure/Database/Books/Covers/" + coverName + ".png")
-    #     print(title, " ", author, " ", publisher, " ", date, " ",dateNow)
-    #     book = Book(-1, coverName, title, date, publisher, authors)
-
-    #     newID = self.CSV.AddBook(book)
-    #     if(newID == -1):
-    #         print("This book is already registered")
-    #     else:
-    #         print("ID = ", newID)
-    #     self.close()
 
     # def OpenFile(self):
     #     fileName = QFileDialog.getOpenFileName(self.labelPicture,
@@ -1056,12 +1010,11 @@ class BookWindow(QMainWindow):
     #         print(self.labelPicture.pixmap())
     #         print("open")
 
-    # def EnableBtnAdd(self):
-        # if(len(self.lineEditTitle.text()) > 0 and
-        #    len(self.lineEditAuthor.text()) > 0 and
-        #    len(self.lineEditPublisher.text()) > 0 and
-        #    len(self.lineEditDate.text()) > 0 and
-        #    self.labelPicture.pixmap()):
-        #      self.btnAddBook.setEnabled(True)
-        # else:
-        #      self.btnAddBook.setEnabled(False)
+    def enableBtnAdd(self):
+        if(len(self.titleEdit.text()) > 0 and
+           len(self.authorEdit.text()) > 0 and
+           len(self.publisherEdit.text()) > 0 and
+           len(self.yearEdit.text()) > 0):
+             self.btnAddBook.setEnabled(True)
+        else:
+             self.btnAddBook.setEnabled(False)

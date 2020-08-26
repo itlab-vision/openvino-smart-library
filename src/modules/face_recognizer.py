@@ -202,6 +202,7 @@ class DNNRecognizer(FaceRecognizer):
 
     def register(self, img, ID = 0):
         _, vec = self.get_features(img)
+        print(self.bd.size, vec.size )
         self.bd = np.append(self.bd, [vec], axis=0)
         self.counter = self.bd.shape[0]
         return self.counter

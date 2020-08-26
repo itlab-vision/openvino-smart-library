@@ -48,10 +48,12 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         self.dAuthor = {'author_id': 'author_id', 'first_name': 'first_name',
                         'last_name': 'last_name', 'middle_name': 'middle_name'}
         self.dAuthorship = {'book_id': 'book_id', 'author_id': 'author_id'}
+        self.dUserRole = {'user_id':'user_id', 'role_id': 'role_id'}
         self.dRole = {'role_id': 'role_id', 'description': 'description'}
         self.dModel = {'model_id': 'model_id', 'file_path': 'file_path',
                        'name_model': 'name_model'}
         #
+        self.fieldnamesRoles = [self.dUserRole['user_id'], self.dUserRole['role_id']]
         self.fieldnamesUser = [self.dUser['user_id'], self.dUser['phone'],
                               self.dUser['first_name'],
                               self.dUser['last_name'],
@@ -120,11 +122,15 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         fileAuthorshipR.close()
         return book
     
-    def AddUser(self, user):
+    def AddUser(self, user, userType):
         fileUsersR = open(self.fUsers, newline = '')
         fileUsersW = open(self.fUsers, 'a', newline = '')
+
+        fileRolesR = open(self.fRoles, newline = '')
+        fileUserRoleW = open(self.fUserRole,  'a', newline = '')
         # 'a' - дозапись в файл, 'w' - перезапись файла
         reader = csv.DictReader(fileUsersR, delimiter = ',')
+        
         # если такой пользователь уже есть в базе, то raise
         for line in reader:
             if ((user.first_name == line[self.dUser['first_name']]) and
@@ -144,10 +150,28 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                          self.dUser['last_name']: user.last_name,
                          self.dUser['middle_name']: user.middle_name})
         #
+        writer = csv.DictWriter(fileUserRoleW, fieldnames = self.fieldnamesRoles,
+                                                              delimiter = ',')
+        writer.writerow({self.dUserRole['user_id']: user.user_id,
+                         self.dUserRole['role_id']: userType.value})
+        #
         fileUsersR.close()
         fileUsersW.close()
+        fileRolesR.close()
+        fileUserRoleW.close()
         return user.user_id
     
+    def GetUserRole(self, user_id):
+        fileUserRoleR = open(self.fUserRole, newline = '')
+        reader = csv.DictReader(fileUserRoleR, delimiter = ',')
+        role_id = 0
+        for i, line in enumerate(reader, 1):
+            if (i == user_id):
+                role_id = int(line[self.dRole['role_id']])
+                break
+        fileUserRoleR.close()
+        return role_id
+
     def GetUser(self, user_id):
         # РАЗОБРАТЬСЯ С ENUMERATE!
         fileUsersR = open(self.fUsers, newline = '')
@@ -171,6 +195,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
             if (i == user_id):
                 role_id = int(line[self.dRole['role_id']])
                 break
+        
         # зная role_id, нахожу полную информацию об этой роли
         reader = csv.DictReader(fileRolesR, delimiter = ',')
         role = Role(-1, -1)
@@ -342,7 +367,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                 # нахожу нужную дату по id книги и пользователя
                 if (line["book_id"] == str(book_id) and line["user_id"] == str(user_id)):
                     # если эту книгу этот пользователь уже брал, то оформим новую запись
-                    if (line["return_date"] != '-1'):
+                    if (line["return_date"] != '-'):
                         continue
                     # если же он книгу не взял, но не вернул, то сдаем книгу
                     borrowDate = line["borrow_date"]
@@ -352,7 +377,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
             FileReadersW = open(path + "Readers.csv", "a", newline = '')
             fieldnames = ['user_id', 'book_id', 'borrow_date', 'return_date']
             writer = csv.DictWriter(FileReadersW, fieldnames = fieldnames, delimiter = ',')
-            writer.writerow({'user_id': user_id, 'book_id': book_id, 'borrow_date': datetime.strftime(datetime.now(), "%d.%m.%Y"), 'return_date': "-1"})
+            writer.writerow({'user_id': user_id, 'book_id': book_id, 'borrow_date': datetime.strftime(datetime.now(), "%d.%m.%Y"), 'return_date': "-"})
             FileReadersW.close()
         if (status == 2):
             s = str(user_id) + ',' + str(book_id) + ',' + borrowDate + ','
@@ -361,7 +386,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
             FileReadersOverW = open(path + "Readers.csv", "w", newline = '')
             for line in lines:
                 line = line.strip()
-                if line == s + '-1':
+                if line == s + '-':
                     FileReadersOverW.write(s + datetime.strftime(datetime.now(), "%d.%m.%Y") + '\r' + '\n')
                 else:
                     FileReadersOverW.write(line + '\r' + '\n')

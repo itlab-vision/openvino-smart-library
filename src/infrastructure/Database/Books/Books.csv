@@ -1,6 +1,4 @@
 book_id,file_path,title,year,publisher
-1,file_path1,title1,year1,publisher1
-2,file_path2,title2,year2,publisher2
-3,file_path3,title3,year3,publisher3
-4,file_path4,title4,year4,publisher4
-5,file_path5,title5,year5,publisher5
+1,-,Курс алгебры,2017,МЦНМО
+2,-,Понедельник начинается в субботу,2017,АСТ
+3,-,Лекции по обыкновенным дифференциальным уравнениям,2016,ИКИ
