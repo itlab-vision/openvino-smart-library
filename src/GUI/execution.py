@@ -25,8 +25,9 @@ class Thread(QThread):
 
     allID = {-1:-1}
 
-    def __init__(self):
+    def __init__(self, CSV):
        QThread.__init__(self)
+       self.CSV = CSV
 
     def run(self):
         self.processCamera()
@@ -89,14 +90,18 @@ class Thread(QThread):
         brArgs = dict(name='QR')
         self.bookRec = br.BookRecognizer.create(brArgs)
         print("init book recognizer")
+        usersID, vecs = self.CSV.GetModels()
+        for i in usersID:
+            self.allID[i] = i
+        print(self.allID)
         rdArgs = dict(name = 'DNNfr',
-                  rdXML = path+'face-reidentification-retail-0095.xml',
-                   rdWidth = 128, rdHeight = 128,
-                  rdThreshold = 0.8, fdName = 'DNNfd',
-                  fdXML = path+'face-detection-retail-0004.xml', fdWidth = 300, fdHeight = 300,
-                  fdThreshold = 0.9, lmName = 'DNNlm',
-                  lmXML = path+'landmarks-regression-retail-0009.xml',
-                  lmWidth= 48, lmHeight= 48)
+                    rdXML = path+'face-reidentification-retail-0095.xml',
+                    rdWidth = 128, rdHeight = 128,
+                    rdThreshold = 0.8, fdName = 'DNNfd',
+                    fdXML = path+'face-detection-retail-0004.xml', fdWidth = 300, fdHeight = 300,
+                    fdThreshold = 0.9, lmName = 'DNNlm',
+                    lmXML = path+'landmarks-regression-retail-0009.xml',
+                    lmWidth = 48, lmHeight = 48, db = vecs)
         self.faceRec = fr.FaceRecognizer.create(rdArgs)
         print("init face recognizer")
         self.cap = cv2.VideoCapture(0)
@@ -116,23 +121,25 @@ class Thread(QThread):
             else:
                 self.drawQR(img, self.bookRec.objects)
                 print('Decoded Data : {}'.format(data))
-                
+
             rgbImage = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             qtImage = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
                                          QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(qtImage)
 
             if(self.regUser):
-                self.userID = self.faceRec.register(img)
+                self.userID, vec = self.faceRec.register(img)
+                self.CSV.AddModel(Model(self.userID, vec))
                 self.allID[self.userID] = self.newUserID
                 self.regUser = False
-                
+
             if(self.recBook):
                 self.bookID = self.recognizeBook(img)
                 self.returnBookID.emit(self.bookID)
                 self.recBook = False
 
             self.camera.emit(pixmap)
+            print(self.userID)
             self.returnUserID.emit(self.allID[self.userID])
 
     def recognizeBook(self, img):
@@ -183,7 +190,7 @@ class Execution(QMainWindow):
         self.bookWin.btnAddBook.clicked.connect(self.addBook)
 
         self.image = QPixmap()
-        self.thread = Thread()
+        self.thread = Thread(self.CSV)
 
         self.thread.camera.connect(self.showWebCameraOnSignIn)
         self.thread.returnUserID.connect(self.getUserID)

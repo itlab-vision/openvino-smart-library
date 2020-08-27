@@ -19,7 +19,7 @@ class FaceRecognizer(ABC):
                    args['fdName'], args['fdXML'],
                    args['fdWidth'], args['fdHeight'], args['fdThreshold'],
                    args['lmName'], args['lmXML'],
-                   args['lmWidth'], args['lmHeight'])
+                   args['lmWidth'], args['lmHeight'], args['db'])
         else:
             raise Exception('Error: wrong recognizer name')
 
@@ -153,15 +153,17 @@ class DNNDetector(FaceDetector):
 class DNNRecognizer(FaceRecognizer):
     def __init__(self, recXML, recWidth, recHeight, recThreshold,
                   detName, detXML, detWidth, detHeight, detThreshold,
-                  lmarksName, lmarksXML, lmarksWidth, lmarksHeight):
+                  lmarksName, lmarksXML, lmarksWidth, lmarksHeight, db = None):
         args = dict(name = lmarksName, modelXML = lmarksXML,
                     width = lmarksWidth, height = lmarksHeight)
         self.fl = FaceLandmarks.create(args)
         args = dict(name = detName, modelXML = detXML,
                     width = detWidth, height = detHeight, threshold = detThreshold)
         self.det = FaceDetector.create(args)
-
-        self.bd = np.empty((0, 256), dtype=np.float32)
+        if (db is not None):
+            self.db = db
+        else:
+            self.db = np.empty((0, 256), dtype=np.float32)
         self.counter = 0
         self.modelXML = recXML
         self.modelBIN = os.path.splitext(self.modelXML)[0] + '.bin'
@@ -198,11 +200,11 @@ class DNNRecognizer(FaceRecognizer):
 
     def recognize(self, img):
         faces, fVec = self.get_features(img)
-        return (faces, self.similarity(fVec, self.bd))
+        return (faces, self.similarity(fVec, self.db))
 
     def register(self, img, ID = 0):
         _, vec = self.get_features(img)
-        print(self.bd.size, vec.size )
-        self.bd = np.append(self.bd, [vec], axis=0)
-        self.counter = self.bd.shape[0]
-        return self.counter
+        print(self.db.size, vec.size )
+        self.db = np.append(self.db, [vec], axis=0)
+        self.counter = self.db.shape[0]
+        return self.counter, vec

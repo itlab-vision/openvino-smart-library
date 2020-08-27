@@ -1,4 +1,5 @@
 import csv # модуль для работы с csv-файлами
+import numpy as np
 
 from datetime import datetime
 
@@ -27,9 +28,7 @@ def NumOfLines(file):
 
 class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                   IDatabaseFRM, IDatabaseGUI):
-    # dbRootDir = 'infrastructure/Database/'
     dbRootDir = 'src/infrastructure/Database/'
-    
     def __init__(self):
         self.fBooks = self.dbRootDir + 'Books/Books.csv'
         self.fAuthors = self.dbRootDir + 'Books/Authors.csv'
@@ -50,24 +49,22 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         self.dAuthorship = {'book_id': 'book_id', 'author_id': 'author_id'}
         self.dUserRole = {'user_id':'user_id', 'role_id': 'role_id'}
         self.dRole = {'role_id': 'role_id', 'description': 'description'}
-        self.dModel = {'model_id': 'model_id', 'file_path': 'file_path',
-                       'name_model': 'name_model'}
+        self.dModel = {'user_id': 'user_id', 'vec': 'vec'}
         #
         self.fieldnamesRoles = [self.dUserRole['user_id'], self.dUserRole['role_id']]
         self.fieldnamesUser = [self.dUser['user_id'], self.dUser['phone'],
                               self.dUser['first_name'],
                               self.dUser['last_name'],
                               self.dUser['middle_name']]
-        self.fieldnamesModel = [self.dModel['model_id'],
-                                self.dModel['file_path'],
-                                self.dModel['name_model']]
-        
+        self.fieldnamesModel = [self.dModel['user_id'],
+                                self.dModel['vec']]
+
     # def GetNewUserID(self, file):
         # lines = 0
         # for line in open(file):
             # lines = lines + 1
         # return lines
-    
+
     def GetNewUserID(self):
         newID = str(datetime.now())
         newID = newID.replace('-', '')
@@ -75,7 +72,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         newID = newID.replace(':', '')
         newID = newID.replace('.', '')
         return newID
-        
+
     def GetBookCovers(self):
         fileBooksR = open(self.fBooks, newline = '')
         fileAuthorsR = open(self.fAuthors, newline = '')
@@ -121,7 +118,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         fileAuthorsR.close()
         fileAuthorshipR.close()
         return book
-    
+
     def AddUser(self, user, userType):
         fileUsersR = open(self.fUsers, newline = '')
         fileUsersW = open(self.fUsers, 'a', newline = '')
@@ -130,7 +127,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         fileUserRoleW = open(self.fUserRole,  'a', newline = '')
         # 'a' - дозапись в файл, 'w' - перезапись файла
         reader = csv.DictReader(fileUsersR, delimiter = ',')
-        
+
         # если такой пользователь уже есть в базе, то raise
         for line in reader:
             if ((user.first_name == line[self.dUser['first_name']]) and
@@ -160,7 +157,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         fileRolesR.close()
         fileUserRoleW.close()
         return user.user_id
-    
+
     def GetUserRole(self, user_id):
         fileUserRoleR = open(self.fUserRole, newline = '')
         reader = csv.DictReader(fileUserRoleR, delimiter = ',')
@@ -195,7 +192,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
             if (i == user_id):
                 role_id = int(line[self.dRole['role_id']])
                 break
-        
+
         # зная role_id, нахожу полную информацию об этой роли
         reader = csv.DictReader(fileRolesR, delimiter = ',')
         role = Role(-1, -1)
@@ -209,29 +206,30 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         fileUserRoleR.close()
         fileRolesR.close()
         return (user, role) # tuple()
-    
-    def GetTrainedModel(self, name_model):
+
+    def GetModels(self):
+        db = np.empty((0, 256), dtype=np.float32)
+        usersID = np.empty(0, dtype=np.int)
         fileModelsR = open(self.fModels, newline = '')
         reader = csv.DictReader(fileModelsR, delimiter = ',')
         for line in reader:
-            if (name_model == line[self.dModel['name_model']]):
-                return line[self.dModel['file_path']]
-            
+            a = np.fromstring(line[self.dModel['vec']][1:-1], dtype=np.float32, sep=' ')
+            db = np.append(db, [a], axis=0)
+            usersID = np.append(usersID, int(line[self.dModel['user_id']]))
         fileModelsR.close()
-        raise Exception('This model does not exist!')
-    
+        return usersID, db
+
     def AddModel(self, model):
         fileModelsW = open(self.fModels, 'a', newline = '')
         writer = csv.DictWriter(fileModelsW, fieldnames = self.fieldnamesModel,
                                 delimiter = ',')
-        writer.writerow({self.dModel['model_id']: model.model_id,
-                         self.dModel['file_path']: model.file_path,
-                         self.dModel['name_model']: model.name_model})
+        writer.writerow({self.dModel['user_id']: model.user_id,
+                         self.dModel['vec']: model.vec})
         #
         fileModelsW.close()
-        
+
     ###########
-    
+
     def AddBook(self, book):
         FileBooksR = open(path + "Books/Books.csv", newline = '')
         # если такая книга уже есть, то вернуть -1
@@ -250,7 +248,7 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
         fieldnamesBooks = ['book_id', 'file_path', 'title', 'year', 'publisher']
         writerBooks = csv.DictWriter(FileBooksW, fieldnames = fieldnamesBooks, delimiter = ',')
         writerBooks.writerow({'book_id': new_book_id, 'file_path': book.file_path, 'title': book.title, 'year': book.year, 'publisher': book.publisher})
-        # 
+        #
         readerAuthors = csv.DictReader(FileAuthorsR, delimiter = ',')
         fieldnamesAuthors = ['author_id', 'first_name', 'last_name', 'middle_name']
         writerAuthors = csv.DictWriter(FileAuthorsW, fieldnames = fieldnamesAuthors, delimiter = ',')
@@ -270,29 +268,29 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
             writerAuthorship.writerow({'book_id': new_book_id, 'author_id': new_author_id})
             FileAuthorsR.seek(0)
             FileAuthorsW.seek(0)
-        
+
         FileBooksR.close()
         FileBooksW.close()
         FileAuthorsR.close()
         FileAuthorsW.close()
         FileAuthorshipW.close()
         return new_book_id
-    
-    
+
+
     def GetAllUsers(self):
         FileUsersR = open(path + "Users/Users.csv", newline = '')
         reader = csv.DictReader(FileUsersR, delimiter = ',')
         user = []
         for line in reader:
             user.append(User(line["user_id"], line["phone"], line["first_name"], line["last_name"], line["middle_name"]))
-        
+
         FileUsersR.close()
         return user
-    
-    
+
+
     def GetAllBooks(self):
         return self.GetBookCovers()
-    
+
     def GetBorrowedBooks(self):
         # HELP!
         # пытался реализовать все циклы по строкам файлов при помощи enumerate в целях экономии времени работы методов, но возникают проблемы с возвратом указателя в начало файла
@@ -343,18 +341,18 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                 # нахожу нужную книгу
                 if (lineBooks["book_id"] ==  lineReaders["book_id"]):
                     # добавляю её в book[]
-                    new_list = authors.copy() # новый список для устранения проблем с памятью 
+                    new_list = authors.copy() # новый список для устранения проблем с памятью
                     book.append(Book(lineBooks["book_id"], lineBooks["file_path"], lineBooks["title"], lineBooks["year"], lineBooks["publisher"], new_list))
                     authors.clear()
                     break
-                
+
         FileUsersR.close()
         FileBooksR.close()
         FileAuthorsR.close()
         FileAuthorshipR.close()
         FileReadersR.close()
         return (book, date1, date2, user) # tuple()
-        
+
     def ChangeBookStatus(self, user_id, book_id):
         status = 1
         borrowDate = ""
@@ -391,37 +389,37 @@ class CSVDatabase(IDatabaseBRM, IDatabaseAuthService,
                 else:
                     FileReadersOverW.write(line + '\r' + '\n')
             FileReadersOverW.close()
-            
+
         FileReadersR.close()
 
 if __name__ == "__main__":
     CSV = CSVDatabase()
-    
+
     # TEST GetAllBooks()
     # book = CSV.GetAllBooks()
     # for b in book:
     #     b._print()
-    
+
     # TEST GetBookCovers()
     # book = CSV.GetBookCovers()
     # for b in book:
     #     b._print()
-    
+
     # TEST AddUser()
     # user = User(CSV.GetNewUserID(), 10, 'A', 'B', 'C')
     # CSV.AddUser(user)
-    
+
     # TEST GetUser()
     # user = CSV.GetUser(2)[0]
     # role = CSV.GetUser(2)[1]
     # user._print()
     # role._print()
-    
+
     # TEST GetTrainedModel()
     # line = CSV.GetTrainedModel('name_model2')
     # print(line)
     # line = CSV.GetTrainedModel('name')
-    
+
     # TEST AddModel()
     # model = Model(1000, 'new_model_path', 'new_model_name')
     # CSV.AddModel(model)
