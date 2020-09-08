@@ -1,6 +1,6 @@
 # Smart Library
 
-The applicattion is automated “smart library” based on [OpenVINO toolkit](openvino-toolkit) and pre-trained
+The applicattion is automated “smart library” based on [OpenVINO toolkit][openvino-toolkit] and pre-trained
 models from [Open Model Zoo](OMZ). It involves the registration of the reader; authorization of the reader
 through face recognition; receiving and returning books by recognizing QR codes generated for each book in the library.
 The following pretrained models for face recognition is used:
@@ -9,7 +9,7 @@ The following pretrained models for face recognition is used:
 * `landmarks-regression-retail-0009`, to predict face keypoints;
 * `face-reidentification-retail-0095`, to recognize readers.
 
-For more information about the pre-trained models, refer to the [model documentation](OMZ-models).
+For more information about the pre-trained models, refer to the [model documentation][OMZ-models].
 
 ## Demonstration
 
@@ -50,12 +50,9 @@ pip install -r requirements.txt
 '''
 
 ### Creating QR-codes for books
-Once you've added a new book, qr-code will be generated automatically and placed at [qr-codes folder](qr-codes-folder)
+Once you've added a new book, qr-code will be generated automatically and placed at [qr-codes folder][qr-codes-folder].
 
 ### Running the application
-
-``` sh
-python ./smart_library.py
 
 Example of a valid command line to run the application:
 
@@ -76,10 +73,12 @@ call C:/Program Files (x86)/IntelSWTools/openvino_2019.3.334/bin/setupvars.bat
 
 python smart_library.py
 ```
+Or use script `smart_library_start.bat`.
+
 ## See also
 
-* [Console demo of this app](console-demo)
-* [More Demos](OMZ-demos)
+* [Console demo of this app][onsole-demo]
+* [More Demos][OMZ-demos]
 
 <!-- LINKS -->
 [openvino-toolkit]: https://software.intel.com/en-us/openvino-toolkit
