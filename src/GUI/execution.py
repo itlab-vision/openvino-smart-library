@@ -36,17 +36,14 @@ class Thread(QThread):
         # Loop over all decoded objects
         for decodedObject in decodedObjects:
             points = decodedObject.polygon
-
             # If the points do not form a quad, find convex hull
             if len(points) > 4:
                 hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
                 hull = list(map(tuple, np.squeeze(hull)))
             else:
                 hull = points
-
             # Number of points in the convex hull
             n = len(hull)
-
             # Draw the convext hull
             for j in range(0, n):
                 cv2.line(frame, hull[j], hull[(j + 1) % n], (0,0, 255), 3)
@@ -71,7 +68,6 @@ class Thread(QThread):
                 self.putText(img, text, (0,30), 0, -5,
                                            cv2.FONT_HERSHEY_SIMPLEX,
                                             (22, 163, 245), 1, 2)
-
             if np.amax(out) > faceRec.threshold:
                 userID = int(np.argmax(out) + 1)
                 text = 'User #' + str(userID)
@@ -115,7 +111,7 @@ class Thread(QThread):
 
             self.userID = self.recognizeUser(img, self.faceRec)
             data = self.bookRec.recognize(img)
-            # wrapped in if book recognition condition
+            # wrapped in if (book recognition) condition
             if data == '':
                 print('QR-code not detected!')
             else:
@@ -234,7 +230,6 @@ class Execution(QMainWindow):
         height = self.signIn.webcameraLabel.height()
         newImage = self.image.scaled(width, height,
                       Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        # newImage.save("i.png", "PNG")
         self.signIn.webcameraLabel.setPixmap(newImage)
         self.signIn.update()
 
@@ -245,7 +240,6 @@ class Execution(QMainWindow):
         height = self.libraryWin.webcameraLabel.height()
         newImage = self.image.scaled(width, height,
                       Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        # newImage.save("i.png", "PNG")
         self.libraryWin.webcameraLabel.setPixmap(newImage)
         self.libraryWin.update()
 
@@ -277,7 +271,7 @@ class Execution(QMainWindow):
         phone = self.signIn.phoneEdit.text()
         adminCode = self.signIn.adminCodeEdit.text()
 
-        if(adminCode == "1917"):
+        if(adminCode == "1111"):
             userType = UserTypes.Administrator
         else:
             userType = UserTypes.Reader
@@ -350,7 +344,6 @@ class Execution(QMainWindow):
                 continue
             self.libraryWin.tableBorrowingHistory.insertRow(rowPosition)
             authorsStr = "" # строка для размещения в ней ФИО авторов
-
             c = ", " # строка для разделения авторов
             for j in enumerate(Book[i[0]].authors):
                 if (j[0] == len(Book[i[0]].authors) - 1):
@@ -383,7 +376,6 @@ class Execution(QMainWindow):
                 self.libraryWin.tableBooks.insertRow(rowPosition)
                 self.libraryWin.tableBooks.setItem(rowPosition, 0, QTableWidgetItem(Book[i[0]].book_id))
                 authorsStr = "" # строка для размещения в ней ФИО авторов
-
                 c = ", " # строка для разделения авторов
                 for j in enumerate(Book[i[0]].authors):
                     if (j[0] == len(Book[i[0]].authors) - 1):
@@ -441,7 +433,6 @@ class Execution(QMainWindow):
                 self.libraryWin.tableAvailableBooks.setItem(rowPosition, 5,
                                 QTableWidgetItem(Book[i[0]].file_path))
         self.libraryWin.tableAvailableBooks.resizeColumnsToContents()
-    """сделать запись в БД"""
 
     def showAddBookWin(self):
         self.bookWin.show()
@@ -449,7 +440,7 @@ class Execution(QMainWindow):
     def addBook(self):
         title = self.bookWin.titleEdit.text()
         author = self.bookWin.authorEdit.text()
-        """Нескольких авторов одной книги вводить в форму через запятную"""
+        """Separate authors with a coma"""
         authors = []
         fname = ""
         lname = ""
@@ -483,15 +474,7 @@ class Execution(QMainWindow):
 
         publisher = self.bookWin.publisherEdit.text()
         date = self.bookWin.yearEdit.text()
-        # dateNow = str(datetime.now())
-        # dateNow = dateNow.replace(" ", "")
-        # dateNow = dateNow.replace(":", "")
-        # dateNow = dateNow.replace(".", "")
-        # # coverName = dateNow
-        # # self.Cover.save("infrastructure/Database/Books/Covers/" + coverName + ".png")
-        # print(title, " ", author, " ", publisher, " ", date, " ",dateNow)
         book = Book(-1, '-', title, date, publisher, authors)
-
         newID = self.CSV.AddBook(book)
         if(newID == -1):
             print("This book is already registered")

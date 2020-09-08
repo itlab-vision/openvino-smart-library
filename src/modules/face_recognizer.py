@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 refLandmarks = np.float32([[0.31556875000000000, 0.4615741071428571],  # left eye
                            [0.68262291666666670, 0.4615741071428571],  # right eye
                            [0.50026249999999990, 0.6405053571428571],  # tip of nose
-                           [0.34947187500000004, 0.8246919642857142],  # left lip corner, right lip corner
+                           [0.34947187500000004, 0.8246919642857142],  # left lip corner
                            [0.65343645833333330, 0.8246919642857142]]) # right lip corner
 
 class FaceRecognizer(ABC):
@@ -107,7 +107,6 @@ class DNNLandmarks(ABC):
         m[0:2,2:3] = cv.transpose(col_mean_dst) - np.dot(m[0:2,0:2],
                                                    cv.transpose(col_mean_src))
         return m
-
 
     def align(self, img, landmarks, refLandmarks):
         aligned_face = np.copy(img)

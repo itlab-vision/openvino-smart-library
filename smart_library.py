@@ -5,7 +5,6 @@ from execution import *
 def main():
     app = QApplication(sys.argv)
     ex = Execution()
-    # window.show()
     app.exec_()
 
 if __name__ == '__main__':

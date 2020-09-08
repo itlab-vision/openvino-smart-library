@@ -133,40 +133,15 @@ class StyleHelper():
                 "border-bottom-right-radius: 5px;"
                 "padding: 9px;"
                 "min-width: 130px"
-                # "max-width: 400 px"
-                #"width: 200px; }"
                 "} "
                 "QTabBar::tab:hover {"
-                #"text-decoration: underline;"
                 "background-color: qlineargradient( spread:pad, x1:0 y1:0, x2:0 y2:1, stop:0 #687080, stop:0.85 rgba(59,150,214,250));"
                 "}"
                 "QTabBar::tab:selected {"
                 "background-color: qlineargradient( spread:pad, x1:0 y1:0, x2:0 y2:1, stop:0 #687080, stop:0.85 rgba(59,150,214,250));"#qlineargradient( spread:pad, x1:0 y1:0, x2:0 y2:1, stop:0 #687080, stop:0.85 rgba(114,150,214,250));"
                 "padding: 10px;"
                 "margin-bottom: -2px;"
-                "}"
-                )
-                # "QTabWidget::pane {"
-                # "background-color: rgba(0, 0, 0, 0);"
-                # "border-style: solid;"
-                # "border-width: 4px;"
-                # "border-color: rgba(69, 90, 128, 160);"
-                # # # "border-style: solid;"
-                # # "border-width: 0px;"
-                # # "border-color: rgba(69, 90, 128, 100);"
-                # # "top:-1px;"
-                # "}"
-                # # "QTabBar {"
-                # # "background-color: qlineargradient( spread:pad, x1:0 y1:0, x2:0 y2:1, stop:0 #687080, stop:0.85 rgba(59,150,214,250));"
-                # # "width: 256px;"
-                # # "border: none;"
-                # # "}"
-
-                # "QTabBar::tab:selected {"
-                # "background-color: qlineargradient( spread:pad, x1:0 y1:0, x2:0 y2:1, stop:0 #687080, stop:0.85 rgba(114,150,214,250));"
-                # "padding: 10px;"
-                # "margin-bottom: -1px;"
-                # "}")
+                "}")
 
     @staticmethod
     def getTableStyleSheet():
@@ -207,31 +182,7 @@ class StyleHelper():
                 "    subcontrol-position: top;"
                 "    subcontrol-origin: margin;"
                 "}")
-        # QScrollBar:horizontal {"
-        #         "border: 1px solid #999999;"
-        #         "background:black;"
-        #         "width:10px;    "
-        #         "margin: 10px 10px 10px 10px;"
-        #         "}")
-                # "QScrollBar::handle:horizontal {"
-                # "background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
-                # "stop: 0 rgb(32, 47, 130), stop: 0.5 rgb(32, 47, 130), stop:1 rgb(32, 47, 130));"
-                # "min-height: 0px;"
-                # "}"
-                # "QScrollBar::add-line:horizontal  {"
-                # "background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
-                # "stop: 0 rgb(32, 47, 130), stop: 0.5 rgb(32, 47, 130),  stop:1 rgb(32, 47, 130));"
-                # "height: 0px;"
-                # "subcontrol-position: bottom;"
-                # "subcontrol-origin: margin;"
-                # "}"
-                # "QScrollBar::sub-line:horizontal  {"
-                # " background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
-                # "stop: 0  rgb(32, 47, 130), stop: 0.5 rgb(32, 47, 130),  stop:1 rgb(32, 47, 130));"
-                # "height: 0 px;"
-                # "subcontrol-position: top;"
-                # " subcontrol-origin: margin;"
-                # "}")
+
     @staticmethod
     def getSplitterStyleSheet():
         return ("QSplitter {background: transparent; border: none;}"
@@ -256,11 +207,9 @@ class EventsButton(QToolButton):
 class TextButton(QPushButton):
     def __init__(self, text = "", parent = None):
         super(TextButton, self).__init__(parent)
-
         fontSize = 14
         font = QFont("Verdana", fontSize)
         fm = QFontMetrics(font)
-
         width = fm.width(text)
         height = fm.height()
         print(width, height)
@@ -300,7 +249,6 @@ class WebcamPixmap(QLabel):
         self.setStyleSheet(StyleHelper().getPixmapStyleSheet())
         self.setScaledContents(True)
         self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-
         self.setPixmap(self.image.scaled(self.width(),self.height(),
                       Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
@@ -309,25 +257,6 @@ class WebcamPixmap(QLabel):
             self.resize(self.width(), self.width()*self.aspectRatio)
         else:
             self.resize(self.height() / self.aspectRatio, self.height())
-    
-
-        # self.setPixmap(self.pixmap().scaled(self.width(),self.height(),
-        #               Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        # self.setPixmap(self.image.scaled(
-        #     self.width(), self.height(),
-        #     Qt.KeepAspectRatio,  Qt.SmoothTransformation))
-
-    # def hasHeightForWidth(self):
-    #     return True
-
-    # def heightForWidth(self, width):
-    #     return width*9/16
-
-        # rgbImage = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
-        # convertToQtFormat = QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0],
-        #                                  QImage.Format_RGB888)
-        # pixmap = QPixmap.fromImage(convertToQtFormat)
-        # resizeImage = pixmap.scaled(472, 354, Qt.KeepAspectRatio)
 
 class TitleLabel(QLabel):
     def __init__(self, mainSize, parent= None):
@@ -386,12 +315,6 @@ class Table(QTableWidget):
         # self.resizeColumnsToContents()
         self.setShowGrid(False)
         self.setStyleSheet(StyleHelper().getTableStyleSheet())
-
-    # def resizeEvent(self, event):
-    #     print("resize table",self.width(), self.columnCount(), self.width()/self.columnCount())
-    #     for i in range(self.columnCount()):
-    #         print(i)
-    #         self.setColumnWidth(i, self.width()/self.columnCount())
 
 class UserTypes(enum.Enum):
     Reader = 1
@@ -482,7 +405,6 @@ class SignInWindow(QMainWindow):
         self.MainWidget.setLayout(self.verticalWidgets)
 
     def initUI(self):
-
         print("init ui")
         # flags & attributes
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -509,29 +431,29 @@ class SignInWindow(QMainWindow):
                                           StyleHelper().getPixmapStyleSheet())
 
         # signup dialogs
-        self.secondNameLabel = TextLabel(15, "Фамилия*")
+        self.secondNameLabel = TextLabel(15, "Last name*")
         self.secondNameEdit = LineEdit()
 
-        self.firstNameLabel = TextLabel(15, "Имя*")
+        self.firstNameLabel = TextLabel(15, "First name*")
         self.firstNameEdit  = LineEdit()
 
-        self.middleNameLabel = TextLabel(15, "Отчество*")
+        self.middleNameLabel = TextLabel(15, "Middle name*")
         self.middleNameEdit  = LineEdit()
 
-        self.phoneLabel = TextLabel(15, "Телефон*")
+        self.phoneLabel = TextLabel(15, "Phone*")
         self.phoneEdit  = LineEdit()
 
-        self.adminCodeLabel = TextLabel(15, "Код администратора")
+        self.adminCodeLabel = TextLabel(15, "Access code")
         self.adminCodeEdit = LineEdit()
         self.adminCodeEdit.setEchoMode(QLineEdit.Password)
-        self.infoLabel = TextLabel(10, "* - обязательно")
+        self.infoLabel = TextLabel(10, "* - Required field")
 
         # push buttons for sign in and sign up
-        self.btnSignIn = PlainButton(self.size(), "ВОЙТИ")
-        self.btnSignUp = PlainButton(self.size(), "СОЗДАТЬ АККАУНТ")
-        self.btnAccept = PlainButton(self.size(), "ПРИНЯТЬ")
-        self.btnBack = PlainButton(self.size(), "НАЗАД")
-        self.titleText = TextLabel(15, "Вход в Smart Library")
+        self.btnSignIn = PlainButton(self.size(), "LOG IN")
+        self.btnSignUp = PlainButton(self.size(), "SIGN UP")
+        self.btnAccept = PlainButton(self.size(), "ACCEPT")
+        self.btnBack = PlainButton(self.size(), "BACK")
+        self.titleText = TextLabel(15, "Smart Library Login")
 
         #style and effects
         self.shadowEffect = QGraphicsDropShadowEffect()
@@ -631,8 +553,8 @@ class MainWindow(QMainWindow):
         self.tabR1.setLayout(table1Layout)
         self.tabR2.setLayout(table2Layout)
 
-        self.tabReaderWidget.addTab(self.tabR1, "ИСТОРИЯ")
-        self.tabReaderWidget.addTab(self.tabR2, "ДОСТУПНЫЕ КНИГИ")
+        self.tabReaderWidget.addTab(self.tabR1, "HISTORY")
+        self.tabReaderWidget.addTab(self.tabR2, "AVAILABLE BOOKS")
 
         # admin
         table3Layout.addWidget(self.tableBorrBooks)
@@ -643,9 +565,9 @@ class MainWindow(QMainWindow):
         self.tabA2.setLayout(table4Layout)
         self.tabA3.setLayout(table5Layout)
 
-        self.tabAdminWidget.addTab(self.tabA1, "ВЗЯТЫЕ КНИГИ")
-        self.tabAdminWidget.addTab(self.tabA2, "КНИГИ")
-        self.tabAdminWidget.addTab(self.tabA3, "ЧИТАТЕЛИ")
+        self.tabAdminWidget.addTab(self.tabA1, "BORROWING BOOKS")
+        self.tabAdminWidget.addTab(self.tabA2, "BOOKS")
+        self.tabAdminWidget.addTab(self.tabA3, "READERS")
 
         # splitter left and right widgets
         self.left = QWidget()
@@ -671,7 +593,6 @@ class MainWindow(QMainWindow):
         leftV.addLayout(leftH)
         leftV.addWidget(self.webcameraLabel)
         self.left.setLayout(leftV)
-
 
         bodyWH.addWidget(self.left)
         bodyWH.addWidget(self.right)
@@ -731,36 +652,30 @@ class MainWindow(QMainWindow):
         self.tabR2 = QWidget()
 
         # table with borrowing history
-        self.tableBorrowingHistory  = Table(["ID", "Автор", "Название",
-                                                    "Издатель", "Дата публикации","Взято",
-                                                     "Возвращено"])
-        # self.tableBorrowingHistory.verticalHeader().hide()
-
+        self.tableBorrowingHistory  = Table(["ID", "Author", "Title",
+                                                    "Publisher", "Date published","Borrowed",
+                                                     "Returned"])
         # table with books for readers
-        self.tableAvailableBooks = Table(["ID", "Автор", "Название",
-                                                    "Издатель", "Дата публикации"])
-
+        self.tableAvailableBooks = Table(["ID", "Author", "Title",
+                                                    "Publisher", "Date published"])
         # table with borrowed books
-        self.tableBorrBooks = Table(["User ID", "Book ID", "Фамилия", "Имя",
-                                                     "Отчество", "Телефон", "Название", "Взято",
-                                                     "Возвращено"])
-
-
+        self.tableBorrBooks = Table(["User ID", "Book ID", "Second name", "First name",
+                                                     "Middle Name", "Phone", "Title", "Borrowed",
+                                                     "Returned"])
         # table with all books
-        self.tableBooks = Table(["ID", "Автор", "Название",
-                                                    "Издатель", "Дата публикации"])
-
+        self.tableBooks = Table(["ID", "Author", "Title",
+                                                    "Publisher", "Date published"])
         # table with readers
-        self.tableReaders = Table(["ID", "Фамилия", "Имя",
-                                                     "Отчество", "Телефон"])
-
+        self.tableReaders = Table(["ID", "Second name", "First name",
+                                                     "Middle Name", "Phone"])
         #buttons
-        self.btnExit = TextButton("Выход")
-        self.btnBack = TextButton("Назад")
-        self.btnStat = TextButton("Статистика")
+        self.btnExit = TextButton("Log out")
+        self.btnBack = TextButton("Back")
+        self.btnStat = TextButton("More information...")
         self.btnStat.hide()
-        self.btnGetRetBook = PlainButton(self.size(), "Распознать книгу")
-        self.btnAddBook = PlainButton(self.size(), "Добавить книгу")
+        self.btnGetRetBook = PlainButton(self.size(), "Borrow/return a book")
+        self.btnAddBook = PlainButton(self.size(), "Add a new book")
+        self.btnAddBook.hide()
 
         #style and effects
         self.shadowEffect = QGraphicsDropShadowEffect()
@@ -799,8 +714,6 @@ class MainWindow(QMainWindow):
         rectLeft = QRect(x, y+9, 7 , height - 18)
         rectRight = QRect(x+width-7, y+ 9, 7, height -18)
         rectInterface = QRect(x+9, y+9, width - 18, height -18)
-        # print(event.globalPos(), x, y )
-
         if(rectTop.contains(pos)):
             self.setCursor(Qt.SizeVerCursor)
             return MouseTypes.Top
@@ -830,7 +743,6 @@ class MainWindow(QMainWindow):
             self.mouseBtnPressed  =  MouseTypes.Other
 
     def mouseMoveEvent(self, event):
-        # print(event.globalPos())
         delta = QPoint (event.globalPos() - self.mousePos)
         if (self.mouseBtnPressed == MouseTypes.Move):
             self.move(self.x() + delta.x(),self.y() + delta.y())
@@ -858,19 +770,15 @@ class MainWindow(QMainWindow):
         if (role == UserTypes.Administrator):
             print("admin")
             self.btnStat.show()
+            self.btnAddBook.show()
+        else:
+            self.btnStat.hide()
+            self.btnAddBook.hide()
 
     click = 0
     def showAdminInfo(self):
         self.adminReaderLayout.setCurrentIndex(self.click % 2)
-        self.click  = self.click +1
-        # rowPosition = self.tableBorrBooks.rowCount()
-        # self.tableBorrBooks.insertRow(rowPosition)
-        # self.tableBorrBooks.setItem(rowPosition, 0, QTableWidgetItem("1"))
-        # self.tableBorrBooks.setItem(rowPosition, 1, QTableWidgetItem("1"))
-        # self.tableBorrBooks.setItem(rowPosition, 2, QTableWidgetItem("1"))
-        # self.tableBorrBooks.setItem(rowPosition, 3, QTableWidgetItem("1"))
-        # self.tableBorrBooks.setItem(rowPosition, 4, QTableWidgetItem("1"))
-        # self.tableBorrBooks.setItem(rowPosition, 5, QTableWidgetItem("1"))
+        self.click = self.click + 1
 
 class BookWindow(QMainWindow):
     def __init__(self):
@@ -887,23 +795,14 @@ class BookWindow(QMainWindow):
         self.interfaceWidget.setLayout(QVBoxLayout())
         self.interfaceWidget.layout().addWidget(self.MainWidget)
         #layouts
-        # headerWV = QVBoxLayout()
         controlWH = QHBoxLayout()
-        # titleWH = QHBoxLayout()
         self.inputInfo = QFormLayout()
         self.verticalWidgets = QVBoxLayout()
-
         # add widgets to layout
         controlWH.addWidget(self.titleText)
         controlWH.addStretch(1)
         controlWH.addWidget(self.btnMinimize)
         controlWH.addWidget(self.btnClose)
-
-        # headerWV.addLayout(controlWH)
-        # titleWH.addStretch(1)
-        # titleWH.addWidget(self.title)
-        # # headerWV.addLayout(titleWH)
-
 
         self.inputInfo.addRow(self.titleLabel, self.titleEdit)
         self.inputInfo.addRow(self.authorLabel, self.authorEdit)
@@ -942,23 +841,23 @@ class BookWindow(QMainWindow):
         self.btnMinimize = EventsButton(self.size(), StyleHelper().getMinimizeStyleSheet(),)
 
         # signup dialogs
-        self.titleLabel = TextLabel(15, "Название*")
+        self.titleLabel = TextLabel(15, "Title*")
         self.titleEdit = LineEdit()
 
-        self.authorLabel = TextLabel(15, "Автор*")
+        self.authorLabel = TextLabel(15, "Author*")
         self.authorEdit  = LineEdit()
 
-        self.publisherLabel = TextLabel(15, "Издатель*")
+        self.publisherLabel = TextLabel(15, "Publisher*")
         self.publisherEdit  = LineEdit()
 
-        self.yearLabel = TextLabel(15, "Год*")
+        self.yearLabel = TextLabel(15, "Date published*")
         self.yearEdit  = LineEdit()
 
-        self.infoLabel = TextLabel(10, "* - обязательно")
+        self.infoLabel = TextLabel(10, "* - Required field")
 
         # push buttons for sign in and sign up
-        self.btnAddBook = PlainButton(self.size(), "Добавить книгу", 600)
-        self.titleText = TextLabel(15, "Добавление книги")
+        self.btnAddBook = PlainButton(self.size(), "Add", 600)
+        self.titleText = TextLabel(15, "Add New Book")
 
         #style and effects
         self.shadowEffect = QGraphicsDropShadowEffect()
@@ -990,25 +889,6 @@ class BookWindow(QMainWindow):
         delta = QPoint (event.globalPos() - self.mousePos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.mousePos = event.globalPos()
-
-
-
-    # def OpenFile(self):
-    #     fileName = QFileDialog.getOpenFileName(self.labelPicture,
-    #                                                  'Open File',"",
-    #                                                  "Images (*.png *.jpg *.jpeg *.bmp *.gif)")
-    #     """Pixmap - показываем миниатюру картинки на экране загрузки
-    #        self.Cover - сохраняем полную картинку, чтобы потом ее записать в нужную папку"""
-    #     if(fileName[0] != ""):
-    #         pixmap = QPixmap(fileName[0])
-    #         self.Cover = pixmap
-    #         pixmap = pixmap.scaled(self.labelPicture.width(),
-    #                                self.labelPicture.height(),
-    #                                QtCore.Qt.KeepAspectRatio)
-    #         self.labelPicture.setPixmap(pixmap)
-    #         self.EnableBtnAdd()
-    #         print(self.labelPicture.pixmap())
-    #         print("open")
 
     def enableBtnAdd(self):
         if(len(self.titleEdit.text()) > 0 and
