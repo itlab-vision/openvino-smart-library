@@ -1,4 +1,2 @@
-call  C:\Intel\computer_vision_sdk_2018.5.456\bin\setupvars.bat
-cd src
-python __init__.py
-pause
+call "C:\Program Files (x86)\IntelSWTools\openvino_2020.4.287\bin\setupvars.bat"
+python smart_library.py

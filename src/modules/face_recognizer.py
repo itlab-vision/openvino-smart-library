@@ -1,58 +1,217 @@
+import sys, os
 import numpy as np
-import ctypes as C
+import cv2 as cv
+
 from abc import ABC, abstractmethod
+
+refLandmarks = np.float32([[0.31556875000000000, 0.4615741071428571],  # left eye
+                           [0.68262291666666670, 0.4615741071428571],  # right eye
+                           [0.50026249999999990, 0.6405053571428571],  # tip of nose
+                           [0.34947187500000004, 0.8246919642857142],  # left lip corner
+                           [0.65343645833333330, 0.8246919642857142]]) # right lip corner
 
 class FaceRecognizer(ABC):
      @staticmethod
-     def create(name):
-         if name == "PVL":
-            rec = PVLRecognizer()
-            return rec
-         else:
+     def create(args):
+        if args['name'] == 'DNNfr':
+            return DNNRecognizer(args['rdXML'],
+                   args['rdWidth'], args['rdHeight'], args['rdThreshold'],
+                   args['fdName'], args['fdXML'],
+                   args['fdWidth'], args['fdHeight'], args['fdThreshold'],
+                   args['lmName'], args['lmXML'],
+                   args['lmWidth'], args['lmHeight'], args['db'])
+        else:
             raise Exception('Error: wrong recognizer name')
-           
+
      @abstractmethod
-     def register(self, img):
-         """Register new reader"""
-         
+     def register(self, img, ID):
+         '''Register new reader'''
+
      @abstractmethod
      def recognize(self, img):
-         """Recognize valid user"""
-         
-class PVLRecognizer(FaceRecognizer):
-    def init(self, path):
+         '''Recognize valid user'''
+
+class FaceDetector(ABC):
+     @staticmethod
+     def create(args):
+         if args['name'] == 'DNNfd':
+            return DNNDetector(args['modelXML'], args['width'],
+                              args['height'], args['threshold'])
+         else:
+            raise Exception('Error: wrong detector name')
+
+     @abstractmethod
+     def detect(self, img,  threshold):
+         '''Detect faces on image'''
+
+class FaceLandmarks(ABC):
+    @staticmethod
+    def create(args):
+         if args['name'] == 'DNNlm':
+            return DNNLandmarks(args['modelXML'], args['width'],
+                                               args['height'])
+         else:
+            raise Exception('Error: wrong detector name')
+
+    @abstractmethod
+    def align(self, img, l):
+         '''Detect faces on image'''
+
+class DNNLandmarks(ABC):
+    def __init__(self, modelXML, width, height):
+        self.modelXML = modelXML
+        self.modelBIN =  os.path.splitext(self.modelXML)[0] + '.bin'
+        self.width = width
+        self.height = height
+        backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
+        targetId = cv.dnn.DNN_TARGET_CPU
+        self.net = cv.dnn.readNet(self.modelBIN, self.modelXML)
+        self.net.setPreferableBackend(backendId)
+        self.net.setPreferableTarget(targetId)
+
+    def find_landmarks(self, img):
         try:
-          self.PVL = C.cdll.LoadLibrary(path)
-        except OSError:
-          print("Can`t load dll")
-          return False
+            blob = cv.dnn.blobFromImage(img,  size=(self.width, self.height))
+            self.net.setInput(blob)
+            out = self.net.forward()
+            out = out.flatten()
+            landmarks = np.empty((5, 2), dtype=np.float32)
+            for i in range(5):
+                landmarks[i] = [out[2*i],out[2*i+1] ]
+            return landmarks
+        except Exception as e:
+            print('exception: ' + str(e))
+            return np.zeros((5, 2), dtype=np.float32)
+
+    def get_transform(self, src, dst):
+        col_mean_src = cv.reduce(src, 0, cv.REDUCE_AVG)
+        for row in src:
+            row-=col_mean_src[0]
+
+        col_mean_dst = cv.reduce(dst, 0, cv.REDUCE_AVG)
+        for row in dst:
+            row-=col_mean_dst[0]
+
+        mean, dev_src = cv.meanStdDev(src)
+        dev_src[0,0] = max(sys.float_info.epsilon, dev_src[0])
+        src /= dev_src[0,0]
+
+        mean, dev_dst = cv.meanStdDev(dst)
+        dev_dst[0,0] = max(sys.float_info.epsilon, dev_dst[0])
+        dst /= dev_dst[0,0]
+
+        w, u, vt = cv.SVDecomp(np.dot(cv.transpose(src), dst))
+        r = cv.transpose(np.dot(u,vt))
+        m = np.empty((2, 3), dtype=np.float32)
+        m[0:2,0:2] = np.dot(r , (dev_dst[0,0] / dev_src[0,0]))
+        m[0:2,2:3] = cv.transpose(col_mean_dst) - np.dot(m[0:2,0:2],
+                                                   cv.transpose(col_mean_src))
+        return m
+
+    def align(self, img, landmarks, refLandmarks):
+        aligned_face = np.copy(img)
+        refLandmarksCopy =  np.copy(refLandmarks)
+        for  point, refPoint in zip(landmarks, refLandmarksCopy):
+           point[1] = int(point[1]*img.shape[0])
+           point[0] = int(point[0]*img.shape[1])
+           refPoint[1] = int(refPoint[1]*img.shape[0])
+           refPoint[0] = int(refPoint[0]*img.shape[1])
+        m = self.get_transform(landmarks, refLandmarksCopy)
+        aligned_face = cv.warpAffine(aligned_face, m,
+                            (aligned_face.shape[1], aligned_face.shape[0]))
+        return aligned_face
+
+class DNNDetector(FaceDetector):
+    def __init__(self, modelXML, width, height, threshold):
+        self.modelXML = modelXML
+        self.modelBIN = os.path.splitext(self.modelXML)[0] + '.bin'
+        self.width = width
+        self.height = height
+        self.threshold = threshold
+        backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
+        targetId = cv.dnn.DNN_TARGET_CPU
+        self.net = cv.dnn.readNet(self.modelBIN, self.modelXML)
+        self.net.setPreferableBackend(backendId)
+        self.net.setPreferableTarget(targetId)
+
+    def detect(self, img):
+        blob = cv.dnn.blobFromImage(img,  size=(self.width, self.height))
+        self.net.setInput(blob)
+        out	= self.net.forward()
+        faces = []
+        for detection in out.reshape(-1, 7):
+            confidence = float(detection[2])
+            if confidence >  self.threshold:
+                xmin = int(detection[3] *  img.shape[1]) if int(detection[3] *  img.shape[1]) > 0 else 0
+                ymin = int(detection[4] *  img.shape[0]) if int(detection[4] *  img.shape[0]) > 0 else 0
+                xmax = int(detection[5] *  img.shape[1]) if int(detection[5] *  img.shape[1]) > 0 else 0
+                ymax = int(detection[6] *  img.shape[0]) if int(detection[6] *  img.shape[0]) > 0 else 0
+                faces.append(((xmin, ymin), (xmax, ymax)))
+        return faces
+
+class DNNRecognizer(FaceRecognizer):
+    def __init__(self, recXML, recWidth, recHeight, recThreshold,
+                  detName, detXML, detWidth, detHeight, detThreshold,
+                  lmarksName, lmarksXML, lmarksWidth, lmarksHeight, db = None):
+        args = dict(name = lmarksName, modelXML = lmarksXML,
+                    width = lmarksWidth, height = lmarksHeight)
+        print("init fl")
+        self.fl = FaceLandmarks.create(args)
+        args = dict(name = detName, modelXML = detXML,
+                    width = detWidth, height = detHeight, threshold = detThreshold)
+        print("init fl --- success")
+        print("init fd")
+        self.det = FaceDetector.create(args)
+        print("init fd --- success")
+        if (db is not None):
+            self.db = db
         else:
-          return True
-      
-    def XMLPath(self, path):
-        p = C.create_string_buffer(bytes(path.encode())) # may be it can be done easier
-        self.PVL.GetPath.argtypes = [C.c_char_p]
-        self.PVL.GetPath(p)
-        
-    def register(self, img, ID):
-       return self.PVL.Register(img.shape[0],
-                    img.shape[1],
-                    img.ctypes.data_as(C.POINTER(C.c_ubyte)), ID)
-       
+            self.db = np.empty((0, 256), dtype=np.float32)
+        self.counter = 0
+        self.modelXML = recXML
+        self.modelBIN = os.path.splitext(self.modelXML)[0] + '.bin'
+        self.width = recWidth
+        self.height = recHeight
+        self.threshold = recThreshold
+        backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
+        targetId = cv.dnn.DNN_TARGET_CPU
+        print("init fr")
+        print(self.modelXML)
+        print(self.modelBIN)
+        self.net = cv.dnn.readNet(self.modelBIN, self.modelXML)
+        print("init fr --- success")
+        self.net.setPreferableBackend(backendId)
+        self.net.setPreferableTarget(targetId)
+
+    def similarity(self, fVec, refVecs):
+        refVecs =  refVecs.T
+        if fVec.size and  refVecs.size:
+          return np.dot(fVec, refVecs)/(np.linalg.norm(fVec)*np.linalg.norm(refVecs, axis=0))
+        else:
+          return np.zeros((1, 1))
+
+    def get_features(self, img):
+        faces = self.det.detect(img)
+        if len(faces) == 1:
+            face = faces[0]
+            roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
+            landmarks = self.fl.find_landmarks(roi)
+            alignFace = self.fl.align(roi, landmarks, refLandmarks)
+            blob = cv.dnn.blobFromImage(alignFace,  size=(self.width, self.height))
+            self.net.setInput(blob)
+            out	= self.net.forward()
+            featureVec = out.flatten()
+        else:
+            featureVec = np.empty(0)
+        return (faces, featureVec)
+
     def recognize(self, img):
-         x =  C.c_int(0)
-         xptr = C.pointer(x)
-         y = C.c_int(0)
-         yptr = C.pointer(y)
-         w = C.c_int(0)
-         wptr = C.pointer(w)
-         h = C.c_int(0)
-         hptr = C.pointer(h)
-         ID = self.PVL.Recognize(img.shape[0],
-                            img.shape[1],
-                            img.ctypes.data_as(C.POINTER(C.c_ubyte)), 
-                            xptr, yptr, wptr, hptr)
-         return (ID, (x.value, y.value, w.value, h.value)) 
-     
-    def getUID(self):
-        return self.PVL.UnknownID()
+        faces, fVec = self.get_features(img)
+        return (faces, self.similarity(fVec, self.db))
+
+    def register(self, img, ID = 0):
+        _, vec = self.get_features(img)
+        print(self.db.size, vec.size )
+        self.db = np.append(self.db, [vec], axis=0)
+        self.counter = self.db.shape[0]
+        return self.counter, vec
