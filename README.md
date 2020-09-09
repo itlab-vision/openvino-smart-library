@@ -37,8 +37,8 @@ history of borrowing books and more.
 ### Installation and dependencies
 
 The demo depends on:
-- OpenVINO toolkit (2019R3 or newer)
-- OpenCV (>=4.1.2-openvino, provided by OpenVINO)
+- OpenVINO toolkit (2020.3 or newer)
+- OpenCV (>=4.3.0-openvino, provided by OpenVINO)
 - Python (>=3.6.7, which is supported by OpenVINO)
 - PyQt5 (>=5.13.0)
 - pyzbar (>=0.1.8)
@@ -69,7 +69,7 @@ Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Program Files 
 
 ``` powershell
 # Set up the environment
-call C:/Program Files (x86)/IntelSWTools/openvino_2019.3.334/bin/setupvars.bat
+call C:/Program Files (x86)/IntelSWTools/openvino_2020.4.287/bin/setupvars.bat
 
 python smart_library.py
 ```
