@@ -6,6 +6,7 @@ from ui import *
 sys.path.insert(0,"src/modules")
 import face_recognizer as fr
 import book_recognizer as br
+import qr_generator as qr
 
 sys.path.insert(0,"src/infrastructure")
 from CSVDatabase import *
@@ -91,12 +92,12 @@ class Thread(QThread):
             self.allID[i] = i
         print(self.allID)
         rdArgs = dict(name = 'DNNfr',
-                    rdXML = path+'face-reidentification-retail-0095.xml',
+                    rdXML = path + 'face-reidentification-retail-0095.xml',
                     rdWidth = 128, rdHeight = 128,
                     rdThreshold = 0.8, fdName = 'DNNfd',
-                    fdXML = path+'face-detection-retail-0004.xml', fdWidth = 300, fdHeight = 300,
+                    fdXML = path + 'face-detection-retail-0004.xml', fdWidth = 300, fdHeight = 300,
                     fdThreshold = 0.9, lmName = 'DNNlm',
-                    lmXML = path+'landmarks-regression-retail-0009.xml',
+                    lmXML = path + 'landmarks-regression-retail-0009.xml',
                     lmWidth = 48, lmHeight = 48, db = vecs)
         self.faceRec = fr.FaceRecognizer.create(rdArgs)
         print("init face recognizer")
@@ -471,7 +472,6 @@ class Execution(QMainWindow):
                 mname += c
                 continue
         authors.append(Author(-1, fname, lname, mname))
-
         publisher = self.bookWin.publisherEdit.text()
         date = self.bookWin.yearEdit.text()
         book = Book(-1, '-', title, date, publisher, authors)
@@ -483,6 +483,11 @@ class Execution(QMainWindow):
         self.bookWin.close()
         self.updateReaderTables()
         self.updateAdminTables()
+        # create qr-code for book
+        gen = qr.QRgenerator()
+        data = (str(newID) + ' ' + title + ' ' + author + ' ' + publisher + ' ' + date)
+        qrcode = gen.makeQR(data)
+        qrcode.save('qr-codes/' + str(newID) + title + '.png')
 
     def updateReaderTables(self):
         self.borrowingHistoryOneUser()

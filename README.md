@@ -1,7 +1,7 @@
 # Smart Library
 
 The applicattion is automated “smart library” based on [OpenVINO toolkit][openvino-toolkit] and pre-trained
-models from [Open Model Zoo](OMZ). It involves the registration of the reader; authorization of the reader
+models from [Open Model Zoo][OMZ]. It involves the registration of the reader; authorization of the reader
 through face recognition; receiving and returning books by recognizing QR codes generated for each book in the library.
 The following pretrained models for face recognition is used:
 
@@ -45,9 +45,9 @@ The demo depends on:
 - qrcode (>=6.1)
 
 To install all the required Python modules you can use:\
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 ### Creating QR-codes for books
 Once you've added a new book, qr-code will be generated automatically and placed at [qr-codes folder][qr-codes-folder].
@@ -77,7 +77,7 @@ Or use script `smart_library_start.bat`.
 
 ## See also
 
-* [Console demo of this app][onsole-demo]
+* [Console demo of this app][console-demo]
 * [More Demos][OMZ-demos]
 
 <!-- LINKS -->

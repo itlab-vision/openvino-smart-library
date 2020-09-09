@@ -155,10 +155,14 @@ class DNNRecognizer(FaceRecognizer):
                   lmarksName, lmarksXML, lmarksWidth, lmarksHeight, db = None):
         args = dict(name = lmarksName, modelXML = lmarksXML,
                     width = lmarksWidth, height = lmarksHeight)
+        print("init fl")
         self.fl = FaceLandmarks.create(args)
         args = dict(name = detName, modelXML = detXML,
                     width = detWidth, height = detHeight, threshold = detThreshold)
+        print("init fl --- success")
+        print("init fd")
         self.det = FaceDetector.create(args)
+        print("init fd --- success")
         if (db is not None):
             self.db = db
         else:
@@ -171,7 +175,11 @@ class DNNRecognizer(FaceRecognizer):
         self.threshold = recThreshold
         backendId = cv.dnn.DNN_BACKEND_INFERENCE_ENGINE
         targetId = cv.dnn.DNN_TARGET_CPU
+        print("init fr")
+        print(self.modelXML)
+        print(self.modelBIN)
         self.net = cv.dnn.readNet(self.modelBIN, self.modelXML)
+        print("init fr --- success")
         self.net.setPreferableBackend(backendId)
         self.net.setPreferableTarget(targetId)
 
